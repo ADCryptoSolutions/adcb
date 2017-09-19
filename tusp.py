@@ -15,10 +15,10 @@ def test():
     ts = 1504244643
 
     string = ts2string(ts)
-    print string
+    #print string
 
     ts = string2ts(string)
-    print ts
+    #print ts
 
 if __name__ == '__main__':
     test()

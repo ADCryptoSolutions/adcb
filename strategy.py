@@ -1,7 +1,7 @@
 #-*-coding:utf-8-*-
 # ---- emetdan@gmail.com -------
 import pandas as pd
-import pylab as plt
+#import pylab as plt
 import numpy as np
 from profit import change5
 from orders import orders
@@ -23,7 +23,7 @@ def EMAvsSMA(serie, smaPeriod=20,emaPeriod=5):
     w['w'] = w['w'].apply(change5)
     
     w["orders"] = orders(w["w"])
-    
+    """
     plt.figure()
     plt.plot(serie.index,serie,'g',label='precio')
     plt.plot(serie.index,ema,'r',label='EMA_%s'%emaPeriod)
@@ -32,7 +32,7 @@ def EMAvsSMA(serie, smaPeriod=20,emaPeriod=5):
     plt.ylabel('Price (BTC)')
     plt.grid()
     plt.show()
-    
+    """
     return w
 
 # dada una serie de pandas y el numero de muestras para las EMAs devuelve vector w
@@ -52,7 +52,7 @@ def EMAvsEMA(serie, smaPeriod=20,emaPeriod=5):
     w['w'] = w['w'].apply(change5)
     
     w["orders"] = orders(w["w"])
-    
+    """
     plt.figure()
     plt.plot(serie.index,serie,'g',label='precio')
     plt.plot(serie.index,ema,'r',label='EMA_%s'%emaPeriod)
@@ -61,7 +61,7 @@ def EMAvsEMA(serie, smaPeriod=20,emaPeriod=5):
     plt.ylabel('Price (BTC)')
     plt.grid()
     plt.show()
-    
+    """
     return w
 
 # dada una serie de pandas y el numero de muestras para la EMA devuelve vector w
@@ -81,7 +81,7 @@ def pricevsEMA(serie, emaPeriod=5):
     w['w'] = w['w'].apply(change5)
     
     w["orders"] = orders(w["w"])
-    
+    """
     plt.figure()
     plt.plot(serie.index,serie,'g',label='precio')
     plt.plot(serie.index,sma,'r',label='EMA_%s'%emaPeriod)
@@ -89,7 +89,7 @@ def pricevsEMA(serie, emaPeriod=5):
     plt.ylabel('Price (BTC)')
     plt.grid()
     plt.show()
-    
+    """
     return w
 
 # dada una serie de pandas y el numero de muestras para la EMA devuelve vector w
@@ -109,7 +109,7 @@ def pricevsSMA(serie, smaPeriod=20):
     w['w'] = w['w'].apply(change5)
     
     w["orders"] = orders(w["w"])
-    
+    """
     plt.figure()
     plt.plot(serie.index,serie,'g',label='precio')
     plt.plot(serie.index,sma,'b',label='SMA_%s'%smaPeriod)
@@ -117,5 +117,5 @@ def pricevsSMA(serie, smaPeriod=20):
     plt.ylabel('Price (BTC)')
     plt.grid()
     plt.show()
-    
+    """
     return w

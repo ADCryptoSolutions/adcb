@@ -2,7 +2,8 @@
 # ---- emetdan@gmail.com -------
 import sys, getopt
 from tusp import string2ts, ts2string
-  
+import pandas as pd
+
 def main(argv):
 	"""
 	funcion principal
@@ -79,9 +80,8 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
 
 	from poloniex import Poloniex
 	import json
-	import pandas as pd
 	import numpy as np
-	import pylab as plt
+	#import pylab as plt
 	
 	
 	polo = Poloniex()
@@ -127,7 +127,7 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
 	"""
 	
 def backTest(strategy,serie,pair):
-	from strategy import *
+	from strategy import pricevsEMA,pricevsSMA,EMAvsEMA,EMAvsSMA
 	fun_dic = {
 	  "pricevsEMA":pricevsEMA,
 	  "pricevsSMA":pricevsSMA,
@@ -151,7 +151,8 @@ def backTest(strategy,serie,pair):
 	relativeReturn, vecReturn = profit(w["w"],serie["close"])
 	
 	# graficando el retorno del mercado y el de la estrategia
-	plt.figure()
+	""""
+    plt.figure()
 	plt.plot(serie.index,serie['cum_r']*100,'b', label='Mercado %s'%pair)
 	plt.plot(serie.index,vecReturn*100,'r', label='%s'%strategy)
 	plt.legend(loc='best')
@@ -159,11 +160,16 @@ def backTest(strategy,serie,pair):
 	plt.title('Retorno del mercado vs estrategia')
 	plt.grid()
 	plt.show()
-	
+	"""
+	print_full(w)
 	print "Retorno final del mercado: %s"%(serie["cum_r"][-1]*100)
 	print 'El retorno final de la estrategia %s fue: %s'%(strategy,relativeReturn*100)
-	print w
-			
+
+    
+def print_full(x):
+    pd.set_option('display.max_rows', len(x))
+    print(x)
+    pd.reset_option('display.max_rows')
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

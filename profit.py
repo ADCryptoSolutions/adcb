@@ -7,9 +7,10 @@ import numpy as np
 def profit(w,p):
   
   logReturn = np.log(p).diff().fillna(0)
-  
+  vecLogReturn = (logReturn*w).cumsum()
+  vecReturn = np.exp(vecLogReturn)-1
   relativeReturn = np.exp(np.dot(w,logReturn)) - 1
-  return relativeReturn
+  return relativeReturn, vecReturn
 
 # convierte el 0.5 que aparece al principio de w al hacer
 # (dif+1)/2 en los casos en los que se empieza con la orden wait

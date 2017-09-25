@@ -23,6 +23,7 @@ def EMAvsSMA(serie, smaPeriod=20,emaPeriod=5):
     w['w'] = w['w'].apply(change5)
     
     w["orders"] = orders(w["w"])
+    w["price"] = serie
     """
     plt.figure()
     plt.plot(serie.index,serie,'g',label='precio')
@@ -52,6 +53,7 @@ def EMAvsEMA(serie, smaPeriod=20,emaPeriod=5):
     w['w'] = w['w'].apply(change5)
     
     w["orders"] = orders(w["w"])
+    w["price"] = serie
     """
     plt.figure()
     plt.plot(serie.index,serie,'g',label='precio')
@@ -81,6 +83,7 @@ def pricevsEMA(serie, emaPeriod=5):
     w['w'] = w['w'].apply(change5)
     
     w["orders"] = orders(w["w"])
+    w["price"] = serie
     """
     plt.figure()
     plt.plot(serie.index,serie,'g',label='precio')
@@ -109,6 +112,7 @@ def pricevsSMA(serie, smaPeriod=20):
     w['w'] = w['w'].apply(change5)
     
     w["orders"] = orders(w["w"])
+    w["price"] = serie
     """
     plt.figure()
     plt.plot(serie.index,serie,'g',label='precio')

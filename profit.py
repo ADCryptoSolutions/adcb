@@ -11,9 +11,10 @@ def profit(w):
   vecReturn = np.exp(vecLogReturn)-1
   relativeReturn = np.exp(np.dot(w["w"],logReturn)) - 1
   w["logReturn"] = logReturn
+  w["logReturn*w"] = logReturn*w["w"]
   w["cumLogReturn"] = vecLogReturn
-  w["Return"] = vecReturn
-  return relativeReturn, vecReturn
+  w["return"] = vecReturn
+  return vecReturn[-1], vecReturn
 
 # convierte el 0.5 que aparece al principio de w al hacer
 # (dif+1)/2 en los casos en los que se empieza con la orden wait

@@ -4,18 +4,21 @@
 # estrategia dados w y la serie correspondiente al precio
 import numpy as np
 
-def profit2(w,p):
+def profit(w):
   
-  logReturn = np.log(p).diff().fillna(0)
-  vecLogReturn = (logReturn*w).cumsum()
+  logReturn = np.log(w["price"]).diff().fillna(0)
+  vecLogReturn = (logReturn*w["w"]).cumsum()
   vecReturn = np.exp(vecLogReturn)-1
-  relativeReturn = np.exp(np.dot(w,logReturn)) - 1
+  relativeReturn = np.exp(np.dot(w["w"],logReturn)) - 1
+  w["logReturn"] = logReturn
+  w["cumLogReturn"] = vecLogReturn
+  w["Return"] = vecReturn
   return relativeReturn, vecReturn
 
 # convierte el 0.5 que aparece al principio de w al hacer
 # (dif+1)/2 en los casos en los que se empieza con la orden wait
 # en 0.0
-def profit(w):
+def profit2(w):
     
     # Creando nueva columna con los precios
     w["price_profit"] = w["price"]
@@ -30,25 +33,25 @@ def profit(w):
 
 def profit3(w):
 	
-	btc_balance = w["price"].copy()
-	coin_balance = btc_balance.copy()
+	w["btc_balance"] = w["price"]
+	w["coin_balance"] = w["btc_balance"]
 	
-	coin_balance[0] = 0
+	w.loc["coin_balance"][0] = 0
 	
-	for i in range(1,len(l2)):
+	for i in range(1,len(w["btc_balance"])):
 		if w["orders"][i] == "BUY":
-			coin_balance[i] = btc_balance[i]/w["price"][i]
-			btc_balance[i] = 0
+			w.loc["coin_balance"][i] = w["btc_balance"][i]/w["price"][i]
+			w.loc["btc_balance"][i] = 0
 		elif w["orders"][i] == "SELL":
-			btc_balance[i] = coin_balance[i]*w["price"]
-			coin_balance[i] = 0
+			w.loc["btc_balance"][i] = w["btc_balance"][i]*w["price"][i]
+			w.loc["coin_balance"][i] = 0
 		elif w["orders"][i] == "WAIT":
-			btc_balance[i] = btc_balance[i-1]
-			coin_balance[i] = coin_balance[i-1]
+			w.loc["btc_balance"][i] = w["btc_balance"][i-1]
+			w.loc["coin_balance"][i] = w["coin_balance"][i-1]
 	
-	balance = btc_balance + coin_balance*w["price"]
+	w["balance"] = w["btc_balance"] + w["coin_balance"]*w["price"]
 	
-	vecReturn = balance/w[w["orders"] == "BUY"]["price"][0]
+	vecReturn = w["balance"]/w[w["orders"] == "BUY"]["price"][0]
 	relativeReturn = vecReturn[-1]
 	
 	return relativeReturn, vecReturn

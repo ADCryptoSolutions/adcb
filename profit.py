@@ -16,10 +16,7 @@ def profit(w):
   w["return"] = vecReturn
   return vecReturn[-1], vecReturn
 
-# convierte el 0.5 que aparece al principio de w al hacer
-# (dif+1)/2 en los casos en los que se empieza con la orden wait
-# en 0.0
-def profit2(w):
+def profit3(w):
     
     # Creando nueva columna con los precios
     w["price_profit"] = w["price"]
@@ -32,34 +29,39 @@ def profit2(w):
     relativeReturn = vecReturn[-1]
     return relativeReturn, vecReturn
 
-def profit3(w):
+def profit2(w,btc_init):
 	
-	w["btc_balance"] = w["price"]
-	w["coin_balance"] = w["btc_balance"]
-	
-	w.loc["coin_balance"][0] = 0
+	w["btc_balance"] = btc_init
+	w["coin_balance"] = 0.0
+	w["balance"] = 0.0
+		
+	w.loc[:,"btc_balance"].values[0] = btc_init 
 	
 	for i in range(1,len(w["btc_balance"])):
+		
+		w.loc["balance"].values[i] = w["btc_balance"][i] + w["coin_balance"][i]*w["price"][i]
+		
 		if w["orders"][i] == "BUY":
-			w.loc["coin_balance"][i] = w["btc_balance"][i]/w["price"][i]
-			w.loc["btc_balance"][i] = 0
+			w.loc[:,"coin_balance"].values[i] = w["balance"][i]/w["price"][i]
+			w.loc[:,"btc_balance"].values[i] = 0
 		elif w["orders"][i] == "SELL":
-			w.loc["btc_balance"][i] = w["btc_balance"][i]*w["price"][i]
-			w.loc["coin_balance"][i] = 0
+			w.loc[:,"btc_balance"].values[i] = w["balance"][i]*w["price"][i]
+			w.loc[:,"coin_balance"].values[i] = 0
 		elif w["orders"][i] == "WAIT":
-			w.loc["btc_balance"][i] = w["btc_balance"][i-1]
-			w.loc["coin_balance"][i] = w["coin_balance"][i-1]
+			w.loc[:,"btc_balance"].values[i] = w["btc_balance"][i-1]
+			w.loc[:,"coin_balance"].values[i] = w["coin_balance"][i-1]
 	
-	w["balance"] = w["btc_balance"] + w["coin_balance"]*w["price"]
+	#w["balance"] = w["btc_balance"] + w["coin_balance"]*w["price"]
 	
-	vecReturn = w["balance"]/w[w["orders"] == "BUY"]["price"][0]
+	vecReturn = w["balance"]/btc_init
 	relativeReturn = vecReturn[-1]
 	
 	return relativeReturn, vecReturn
 	
 			
-			 
-
+# convierte el 0.5 que aparece al principio de w al hacer
+# (dif+1)/2 en los casos en los que se empieza con la orden wait
+# en 0.0			 
 def change5(f):
     if f == 0.5:
         return 0.0

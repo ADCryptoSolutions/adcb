@@ -31,29 +31,33 @@ def profit3(w):
 
 def profit2(w,btc_init):
 	
-	w["btc_balance"] = btc_init
+	w["btc_balance"] = 0.0
+	w.loc[:,"btc_balance"].values[0] = btc_init
 	w["coin_balance"] = 0.0
 	w["balance"] = 0.0
-		
-	w.loc[:,"btc_balance"].values[0] = btc_init 
+	w.loc[:,"balance"].values[0] = btc_init
 	
 	for i in range(1,len(w["btc_balance"])):
 		
-		w.loc["balance"].values[i] = w["btc_balance"][i] + w["coin_balance"][i]*w["price"][i]
-		
 		if w["orders"][i] == "BUY":
-			w.loc[:,"coin_balance"].values[i] = w["balance"][i]/w["price"][i]
-			w.loc[:,"btc_balance"].values[i] = 0
+			#w.loc[:,"coin_balance"].values[i] = 0.0
+			#w.loc[:,"btc_balance"].values[i] = w["btc_balance"][i-1]
+			w.loc[:,"coin_balance"].values[i] = w["btc_balance"][i-1]/w["price"][i]
+			w.loc[:,"btc_balance"].values[i] = 0.0
 		elif w["orders"][i] == "SELL":
-			w.loc[:,"btc_balance"].values[i] = w["balance"][i]*w["price"][i]
-			w.loc[:,"coin_balance"].values[i] = 0
+			#w.loc[:,"btc_balance"].values[i] = 0.0
+			#w.loc[:,"coin_balance"].values[i] = w["coin_balance"][i-1]
+			w.loc[:,"btc_balance"].values[i] = w["coin_balance"][i-1]*w["price"][i]
+			w.loc[:,"coin_balance"].values[i] = 0.0
 		elif w["orders"][i] == "WAIT":
 			w.loc[:,"btc_balance"].values[i] = w["btc_balance"][i-1]
 			w.loc[:,"coin_balance"].values[i] = w["coin_balance"][i-1]
+		
+		w.loc[:,"balance"].values[i] = w["btc_balance"][i] + w["coin_balance"][i]*w["price"][i]
+		#print w["balance"][i],w["btc_balance"][i],w["coin_balance"][i]
+		#print w["btc_balance"][i] + w["coin_balance"][i]*w["price"][i]
 	
-	#w["balance"] = w["btc_balance"] + w["coin_balance"]*w["price"]
-	
-	vecReturn = w["balance"]/btc_init
+	vecReturn = (w["balance"]-btc_init)/btc_init
 	relativeReturn = vecReturn[-1]
 	
 	return relativeReturn, vecReturn

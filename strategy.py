@@ -9,7 +9,7 @@ from orders import orders
 # dada una serie de pandas o una lista y el numero de muestras para la EMA y SMA devuelve vector w
 # considerando el cruce entre EMA y SMA
 def EMAvsSMA(serie, smaPeriod=20,emaPeriod=5):
-    
+        
     # Calculando media movil a 20 muestras
     sma = serie.rolling(smaPeriod,min_periods=1).mean()
     # caculando exponential movil average
@@ -25,6 +25,7 @@ def EMAvsSMA(serie, smaPeriod=20,emaPeriod=5):
     w["orders"] = orders(w["w"])
     w['w'] = w['w'].shift(1)
     w["price"] = serie
+    
     """
     plt.figure()
     plt.plot(serie.index,serie,'g',label='precio')
@@ -56,6 +57,9 @@ def EMAvsEMA(serie, smaPeriod=20,emaPeriod=5):
     w["orders"] = orders(w["w"])
     w['w'] = w['w'].shift(1)
     w["price"] = serie
+    
+
+    
     """
     plt.figure()
     plt.plot(serie.index,serie,'g',label='precio')

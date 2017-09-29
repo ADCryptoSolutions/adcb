@@ -102,6 +102,7 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
 	df["low"] =pd.to_numeric(df['high'])
 	df["volume"] =pd.to_numeric(df['volume'])
 	df["date"] = pd.to_datetime(df["date"].apply(ts2string))
+	df['weightedAverage'] = pd.to_numeric(df['weightedAverage'])
 
 	# seleccionando la columna de fecha como indice
 	df = df.set_index("date")
@@ -148,7 +149,7 @@ def backTest(strategy,serie,pair):
 	w = fun_dic[strategy](serie["close"])
 	
 	#calculando el retorno relativo de la estrategia
-	relativeReturn, vecReturn = profit(w["w"],serie["close"])
+	relativeReturn, vecReturn = profit(w)
 	
 	# graficando el retorno del mercado y el de la estrategia
 	""""
@@ -161,7 +162,7 @@ def backTest(strategy,serie,pair):
 	plt.grid()
 	plt.show()
 	"""
-	print_full(w)
+	print_full(w[["orders","price","return"]])
 	print "Retorno final del mercado: %s"%(serie["cum_r"][-1]*100)
 	print 'El retorno final de la estrategia %s fue: %s'%(strategy,relativeReturn*100)
 

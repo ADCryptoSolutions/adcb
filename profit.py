@@ -10,9 +10,6 @@ def profit(w):
   vecLogReturn = (logReturn*w["w"]).cumsum()
   vecReturn = np.exp(vecLogReturn)-1
   relativeReturn = np.exp(np.dot(w["w"],logReturn)) - 1
-  w["logReturn"] = logReturn
-  w["logReturn*w"] = logReturn*w["w"]
-  w["cumLogReturn"] = vecLogReturn
   w["return"] = vecReturn
   return vecReturn[-1], vecReturn
 

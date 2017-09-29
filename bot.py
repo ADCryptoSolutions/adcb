@@ -3,6 +3,7 @@
 import sys, getopt
 from tusp import string2ts, ts2string
 import pandas as pd
+import numpy as np
 
 def main(argv):
 	"""
@@ -80,7 +81,6 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
 
 	from poloniex import Poloniex
 	import json
-	import numpy as np
 	#import pylab as plt
 	
 	
@@ -107,20 +107,19 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
 	# seleccionando la columna de fecha como indice
 	df = df.set_index("date")
 	
-	# Calculando retornos relativos
-	# el 1 se refiere al numero de periodos que se toma para calcular el cambio porcentual
-	df["retornos relativos"] = df["close"].pct_change(1).fillna(0)
-
-	# calculando los log retornos
-	df["log retornos"] = np.log(df["close"]).diff().fillna(0)
-
-	# calculando log retorno acumulado
-	df["cum_logr"] = df["log retornos"].cumsum()
-	df["cum_r"] = np.exp(df["cum_logr"]) - 1
-	
 	return df
 
+def marketReturn(df):
 	
+	# calculando los log retornos
+	log_return = np.log(df["close"]).diff().fillna(0)
+	
+	# calculando log retorno acumulado
+	cum_logr = log_return.cumsum()
+	cum_r = np.exp(cum_logr) - 1
+	
+	return cum_r
+
 	"""		 
 	poloKeys = open("../.kp").readlines()			
 	conn = Poloniex(poloKeys[0].strip(),poloKeys[1].strip())

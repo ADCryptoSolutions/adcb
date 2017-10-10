@@ -99,10 +99,12 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
 	#  convirtiendo string a float o int
 	df["close"] =pd.to_numeric(df['close'])
 	df["open"] =pd.to_numeric(df['open'])
-	df["low"] =pd.to_numeric(df['high'])
+	df["low"] =pd.to_numeric(df['low'])
 	df["volume"] =pd.to_numeric(df['volume'])
 	df["date"] = pd.to_datetime(df["date"].apply(ts2string))
 	df['weightedAverage'] = pd.to_numeric(df['weightedAverage'])
+	df['high'] = pd.to_numeric(df['high'])
+	df['open'] = pd.to_numeric(df['open'])
 
 	# seleccionando la columna de fecha como indice
 	df = df.set_index("date")

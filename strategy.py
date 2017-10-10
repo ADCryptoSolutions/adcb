@@ -130,4 +130,4 @@ def pricevsSMA(serie, smaPeriod=20):
     plt.grid()
     plt.show()
     """
-    return w
+    return w,(ema-sma)

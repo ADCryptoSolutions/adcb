@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 from profit import change5
 from orders import orders
+from mldata import ml_data
+from sklearn.linear_model import LogisticRegression
 
 # dada una serie de pandas o una lista y el numero de muestras para la EMA y SMA devuelve vector w
 # considerando el cruce entre EMA y SMA
@@ -130,4 +132,47 @@ def pricevsSMA(serie, smaPeriod=20):
     plt.grid()
     plt.show()
     """
-    return w,(ema-sma)
+    return w
+ 
+def ml_logreg(close,per=0.9,**kwargs):
+	"""
+	close: Serie de Pandas con precio de cierre. Se utiliza para crear
+	       la estrategia ideal.
+	per: Float que especifica en que porcentaje se dividiran train y test.
+	**kwargs: Diccionario con las caracteristicas para entrenar y predecir.
+	"""
+	
+	# dataframe con pesos de la estrategia ideal
+	w = pd.DataFrame(data={"w":ml_data(close).values,"price":close})
+	w["orders"] = orders(w["w"])
+	# vector de pesos de la estrategia ideal
+	w['w'] = w['w'].shift(1)
+	
+	# diccionario que contendra las caracteristicas para evaluar y 
+	# el precio o weightedAverage sobre el que se quiere predecir
+	dic = {"best_w":w["w"],"close":close}
+	# agregando el resto de las caracteristicas
+	dic.update(kwargs)
+	
+	# creando dataframe con los valores del diccionario
+	data = pd.DataFrame(data=dic)
+	
+	# separando datos para crear y evaluar el modelo de machine learning.
+	# se toma train desde 1 para no tener NaN de la primera fila
+	train = data[1:int(len(data)*per)]
+	test = data[int(len(data)*per):]
+	print train.drop(["best_w","close"],axis=1).head()
+	# iniciando modelo de regresion logistica
+	logreg = LogisticRegression()
+	# entrenando el modelo
+	logreg.fit(train.drop(["best_w","close"],axis=1),train["best_w"])
+	# prediciendo con el modelo
+	pred = logreg.predict(test.drop(["best_w","close"],axis=1))
+	
+	# dataframe con vector de pesos de estrategia de regresio logistica
+	w_pred = pd.DataFrame(data={"w":pred,"price":test["close"]})
+	w_pred["orders"] = orders(w_pred["w"])
+	w_pred["w"] = w_pred["w"].shift(1)
+	
+	return w_pred
+	

@@ -4,7 +4,7 @@ import pandas as pd
 from peakdetect import peakdetect
 import pylab as plt
 
-def ml_data(w):
+def ml_data(w,pl=True):
 	
 	# separando fechas de precios
 	y = w.values
@@ -19,11 +19,12 @@ def ml_data(w):
 	ym = [p[1] for p in _max]
 	xn = [p[0] for p in _min]
 	yn = [p[1] for p in _min]
-
-	plot = plt.plot(x, y)
-	plt.hold(True)
-	plt.plot(xm, ym, "r+")
-	plt.plot(xn, yn, "g+")
+	
+	if pl:
+		plot = plt.plot(x, y)
+		plt.hold(True)
+		plt.plot(xm, ym, "r+")
+		plt.plot(xn, yn, "g+")
 	
 	# creando serie que contendra 0 cuando hay maximo, 
 	# 1 cuando hay minimo y 2 cuando no hay ninguno.

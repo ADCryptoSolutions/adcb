@@ -143,7 +143,7 @@ def ml_logreg(close,per=0.9,**kwargs):
 	"""
 	
 	# dataframe con pesos de la estrategia ideal
-	w = pd.DataFrame(data={"w":ml_data(close).values,"price":close})
+	w = pd.DataFrame(data={"w":ml_data(close,pl=False).values,"price":close})
 	w["orders"] = orders(w["w"])
 	# vector de pesos de la estrategia ideal
 	w['w'] = w['w'].shift(1)
@@ -161,7 +161,7 @@ def ml_logreg(close,per=0.9,**kwargs):
 	# se toma train desde 1 para no tener NaN de la primera fila
 	train = data[1:int(len(data)*per)]
 	test = data[int(len(data)*per):]
-	print train.drop(["best_w","close"],axis=1).head()
+	
 	# iniciando modelo de regresion logistica
 	logreg = LogisticRegression()
 	# entrenando el modelo

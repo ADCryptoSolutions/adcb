@@ -17,7 +17,11 @@ def main(argv):
 	# calculando retorno del mercado
 	cumReturn = marketReturn(df)
 	marketReturn = cumReturn[-1]*100
-	 
+	
+
+# Traer los datos en vivo y devolver SELL, WAIT o BUY,
+# según la estrategia que se escoja	
+def live(): 
 	
 
 if __name__ == "__main__":

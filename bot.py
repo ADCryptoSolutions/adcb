@@ -24,7 +24,8 @@ def load_options(argv):
 	'''
 	funcion que carga opciones de usuario
 	'''
-	
+	currencyPair, start, end = "BTC_DGB","2017-06-01 00:00:00","2017-06-01 00:00:00"
+	period, strategy = 3600*4,"EMAvsEMA"
 	try:
 		opts, args = getopt.getopt(argv,"hp:c:n:s:e:f:s:",["period=","currency=","points="])
 	except getopt.GetoptError:
@@ -47,7 +48,7 @@ def load_options(argv):
 			pair = arg
 		elif opt in ("-n", "--points"):
 			lengthOfMA = int(arg)
-		elif opt in ("-s"):
+		elif opt in ("-i"):
 			ts = string2ts(arg)
 			start = str(ts)
 		elif opt in ("-e"):

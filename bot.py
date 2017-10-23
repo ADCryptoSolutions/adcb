@@ -45,7 +45,7 @@ def load_options(argv):
 				print 'Poloniex requires periods in 300,900,1800,7200,14400, or 86400 second increments'
 				sys.exit(2)
 		elif opt in ("-c", "--currency"):
-			pair = arg
+			currencyPair = arg
 		elif opt in ("-n", "--points"):
 			lengthOfMA = int(arg)
 		elif opt in ("-i"):

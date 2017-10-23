@@ -71,12 +71,12 @@ def paper(pair, period, strategy):
 		# Saliendo del programa		
 		except KeyboardInterrupt:
 			
-			yn = raw_input("\n\n\tAre you sure you want to quit (y/n)? ")
+			yn = raw_input("\n\n\tDo you want to quit (y/n)? ")
 			if yn == "y" or yn =="Y" or yn =="yes" or yn =="YES":
-				print "\tSeleccionó %s. Hasta pronto.."%yn
+				print "\tSeleccionó salir. Hasta pronto..\n"
 				sys.exit(1)
 			elif yn == "n" or yn == "N" or yn == "no" or yn == "NO":
-				print "\tSeleccionó %s"%yn
+				print "\tSeleccionó seguir"
 				pass
 	
 if __name__ == "__main__":

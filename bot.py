@@ -13,11 +13,29 @@ def main(argv):
 	# cargando opciones del programa
 	pair, start, end, period, strategy = load_options(argv)
 	
-	# cargando y preparando datos
-	df = prepareData(pair=pair, start=start, end=end, period=period)
+	# inicializando Dataframe
+	df = 0
+	
+	# lista de estrategias de machine learning
+	ml_strategies = ["ml_logreg"]
+	# variable que se usa en run_strategy
+	ml_strategy = False
+	
+	# si la estrategia es de machine learning
+	if strategy in ml_strategies:
+		ml_strategy = True
+		# recalculando el tiempo inicial en virtud del entrenamiento del
+		# algoritmo 
+		start = ml_init_time(end,start)
+		# cargando y preparando datos
+		df = prepareData(pair=pair, start=start, end=end, period=period)
+	else:
+		df = prepareData(pair=pair, start=start, end=end, period=period)
 	
 	# Generando backTesting con las opciones de usuario
-	backTest(strategy,df,pair)
+	#  Corriendo estrategia
+	w, market_return = run_strategy(strategy,df,pair,ml_strategy)
+	backTest(w, market_return, strategy)
 
 
 def load_options(argv):
@@ -110,6 +128,8 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
 	# seleccionando la columna de fecha como indice
 	df = df.set_index("date")
 	
+	# calculando el retorno del mercado en el tiempo seleccionado
+	df["cum_r"] = marketReturn(df)
 	return df
 
 def marketReturn(df):
@@ -128,27 +148,52 @@ def marketReturn(df):
 	conn = Poloniex(poloKeys[0].strip(),poloKeys[1].strip())
 	print conn.returnBalances()['BTC']
 	"""
-	
-def backTest(strategy,serie,pair):
-	from strategy import pricevsEMA,pricevsSMA,EMAvsEMA,EMAvsSMA
+
+def run_strategy(strategy,df,pair,ml_strategy):
+	from strategy import pricevsEMA,pricevsSMA,EMAvsEMA,EMAvsSMA,ml_logreg
 	fun_dic = {
 	  "pricevsEMA":pricevsEMA,
 	  "pricevsSMA":pricevsSMA,
 	  "EMAvsSMA":EMAvsSMA,
-	  "EMAvsEMA":EMAvsEMA
+	  "EMAvsEMA":EMAvsEMA,
+	  "ml_logreg": ml_logreg
 	  }
 	
+	ml_strategies = ["ml_logreg"]
+	
+	w=0
+	
+	if ml_strategy:
+		from stockstats import StockDataFrame
+		
+		#Creando indicadores para estrategia, via stockstats
+		stock = StockDataFrame.retype(df.copy())
+		stock["rsi_14"];
+		stock["macd"];
+		stock["macds"];
+		stock["cci"];
+		stock["wr_14"];
+		
+		# Caracteristicas sobre las que se entrenara el modelo
+		feature_dic = {"rsi":stock["rsi_14"],"cci":stock["cci"],"price":df["close"]}
+		
+		# Creando vector de pesos utilizando estrategia de ML de regresión logística
+		w = fun_dic[strategy](df["close"],per=0.9,**feature_dic)		
+	else:
+		# creando vector de pesos correspondiente 
+		# a la estrategia i.e. cuando se compra y 
+		# cuando se vende.
+		w = fun_dic[strategy](df["close"])
+	
+	return w,df["cum_r"]
+	
+			
+def backTest(w,cum_r,strategy):
 	"""
 	Función para crear un back testing 
-	de una estrategia dada
+	de una estrategia dada. Muestra el profit en la pantalla.
 	"""
-	
 	from profit import profit
-	
-	# creando vector de pesos correspondiente 
-	# a la estrategia i.e. cuando se compra y 
-	# cuando se vende.
-	w = fun_dic[strategy](serie["close"])
 	
 	#calculando el retorno relativo de la estrategia
 	relativeReturn, vecReturn = profit(w)
@@ -165,7 +210,7 @@ def backTest(strategy,serie,pair):
 	plt.show()
 	"""
 	print_full(w[["orders","price","return"]])
-	print "Retorno final del mercado: %s"%(serie["cum_r"][-1]*100)
+	print "Retorno final del mercado: %s"%(cum_r[-1]*100)
 	print 'El retorno final de la estrategia %s fue: %s'%(strategy,relativeReturn*100)
 
     
@@ -173,6 +218,22 @@ def print_full(x):
     pd.set_option('display.max_rows', len(x))
     print(x)
     pd.reset_option('display.max_rows')
+
+# genera el tiempo inicial que se requiere para las estrategias de ML
+def ml_init_time(end,start):
+	"""
+	ts1,ts2 = string, fechas en linux time stamp format
+	"""
+	from datetime import datetime
+	import time
+	
+	tf = datetime.fromtimestamp(end)
+	ti = datetime.fromtimestamp(start)
+	
+	t = tf-10*(tf-ti)
+	t_tuple = t.timetuple()
+	
+	return int(time.mktime(t_tuple))
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

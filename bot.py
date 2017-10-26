@@ -12,7 +12,7 @@ def main(argv):
 	
 	# cargando opciones del programa
 	pair, start, end, period, strategy = load_options(argv)
-	
+	print "\n"+pair, start, end, period, strategy+"n"
 	# inicializando Dataframe
 	df = 0
 	
@@ -21,20 +21,22 @@ def main(argv):
 	# variable que se usa en run_strategy
 	ml_strategy = False
 	
+	per = 0.95
 	# si la estrategia es de machine learning
 	if strategy in ml_strategies:
 		ml_strategy = True
 		# recalculando el tiempo inicial en virtud del entrenamiento del
 		# algoritmo 
-		start = ml_init_time(end,start)
+		start = ml_init_time(end,start,per)
 		# cargando y preparando datos
 		df = prepareData(pair=pair, start=start, end=end, period=period)
 	else:
 		df = prepareData(pair=pair, start=start, end=end, period=period)
 	
+	
 	# Generando backTesting con las opciones de usuario
 	#  Corriendo estrategia
-	w, market_return = run_strategy(strategy,df,pair,ml_strategy)
+	w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
 	backTest(w, market_return, strategy)
 
 
@@ -128,14 +130,12 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
 	# seleccionando la columna de fecha como indice
 	df = df.set_index("date")
 	
-	# calculando el retorno del mercado en el tiempo seleccionado
-	df["cum_r"] = marketReturn(df)
 	return df
 
-def marketReturn(df):
+def marketReturn(serie):
 	
 	# calculando los log retornos
-	log_return = np.log(df["close"]).diff().fillna(0)
+	log_return = np.log(serie).diff().fillna(0)
 	
 	# calculando log retorno acumulado
 	cum_logr = log_return.cumsum()
@@ -149,7 +149,7 @@ def marketReturn(df):
 	print conn.returnBalances()['BTC']
 	"""
 
-def run_strategy(strategy,df,pair,ml_strategy):
+def run_strategy(strategy,df,pair,ml_strategy,per):
 	from strategy import pricevsEMA,pricevsSMA,EMAvsEMA,EMAvsSMA,ml_logreg
 	fun_dic = {
 	  "pricevsEMA":pricevsEMA,
@@ -178,13 +178,22 @@ def run_strategy(strategy,df,pair,ml_strategy):
 		feature_dic = {"rsi":stock["rsi_14"],"cci":stock["cci"],"price":df["close"]}
 		
 		# Creando vector de pesos utilizando estrategia de ML de regresión logística
-		w = fun_dic[strategy](df["close"],per=0.9,**feature_dic)		
+		w = fun_dic[strategy](df["close"],per=per,**feature_dic)		
 	else:
 		# creando vector de pesos correspondiente 
 		# a la estrategia i.e. cuando se compra y 
 		# cuando se vende.
-		w = fun_dic[strategy](df["close"])
+		try:
+			w = fun_dic[strategy](df["close"])
+		except KeyError:
+			print "\n La estrategia %s no es valida. Las estrategias disponibles son:\n"%strategy
+			for key in fun_dic.keys():
+				print "\t"+key
+			print "\n"
+			sys.exit(1)
 	
+	# calculando el retorno del mercado en el tiempo seleccionado
+	df["cum_r"] = marketReturn(w["price"])
 	return w,df["cum_r"]
 	
 			
@@ -220,7 +229,7 @@ def print_full(x):
     pd.reset_option('display.max_rows')
 
 # genera el tiempo inicial que se requiere para las estrategias de ML
-def ml_init_time(end,start):
+def ml_init_time(end,start,per):
 	"""
 	ts1,ts2 = string, fechas en linux time stamp format
 	"""
@@ -230,11 +239,17 @@ def ml_init_time(end,start):
 	tf = datetime.fromtimestamp(end)
 	ti = datetime.fromtimestamp(start)
 	
-	t = tf-10*(tf-ti)
+	print "per: %s, 1-Per: %s, Pocentaje Test-Train %s\n"%(per,1-per,int(1/(1-per)))
+	
+	# se utiliza round para corregir el problema de precision binaria
+	t = tf-(tf-ti)*int(round(1/(1-per)))
+	
+	print "Nuevo tiempo inicial %s\n"%t
 	t_tuple = t.timetuple()
 	
 	return int(time.mktime(t_tuple))
 
+		
 if __name__ == "__main__":
 	main(sys.argv[1:])
 

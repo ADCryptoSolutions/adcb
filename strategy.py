@@ -165,7 +165,11 @@ def ml_logreg(close,per=0.9,**kwargs):
 	# iniciando modelo de regresion logistica
 	logreg = LogisticRegression()
 	# entrenando el modelo
-	logreg.fit(train.drop(["best_w","close"],axis=1),train["best_w"])
+	try:
+		logreg.fit(train.drop(["best_w","close"],axis=1),train["best_w"])
+	except ValueError:
+		print train.isnull().any()
+		print df[df['retornos relativos'].isnull()]
 	# prediciendo con el modelo
 	pred = logreg.predict(test.drop(["best_w","close"],axis=1))
 	

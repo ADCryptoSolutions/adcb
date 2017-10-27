@@ -26,7 +26,7 @@ def profit3(w):
     relativeReturn = vecReturn[-1]
     return relativeReturn, vecReturn
 
-def profit2(w,btc_init):
+def profit2(w,btc_init=1):
 	
 	w["btc_balance"] = 0.0
 	w.loc[:,"btc_balance"].values[0] = btc_init

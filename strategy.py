@@ -169,7 +169,7 @@ def ml_logreg(close,per=0.9,**kwargs):
 		logreg.fit(train.drop(["best_w","close"],axis=1),train["best_w"])
 	except ValueError:
 		print train.isnull().any()
-		print df[df['retornos relativos'].isnull()]
+		print train[train['rsi'].isnull()]
 	# prediciendo con el modelo
 	pred = logreg.predict(test.drop(["best_w","close"],axis=1))
 	

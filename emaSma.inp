@@ -1,5 +1,5 @@
-period = 900
+period = 300
 currencyPair = BTC_XRP
 start = 2017-10-01 00:00:00
 end = 2017-10-02 00:00:00
-strategy = pricevsEMA
+strategy = EMAvsSMA

@@ -174,6 +174,7 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
 		stock["cci"];
 		stock["wr_14"];
 		
+		stock.fillna(method='ffill',inplace=True)
 		# Caracteristicas sobre las que se entrenara el modelo
 		feature_dic = {"rsi":stock["rsi_14"],"cci":stock["cci"],"price":df["close"]}
 		

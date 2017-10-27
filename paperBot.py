@@ -98,29 +98,32 @@ def paper(pair, period, strategy):
 def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance):
 	balance = btc_balance + coin_balance*close
 	if signal == "WAIT":
-		print time, pair, close, signal," ->balance:",balance,"BTC"
+		print time, pair, close, signal," ->balance:",round(balance,5),"BTC"
 	
 	elif signal == "SELL":
 		if have_coin:
 			btc_balance = coin_balance*close
 			coin_balance = 0.0
 			balance = btc_balance
-			print time, pair, close, signal," ->balance:",balance,"BTC"
+			print time, pair, close, signal," ->balance:",round(balance,5),"COIN",coin_balance,"BTC",btc_balance
 			have_coin = False
 		else:
-			print time, pair, close, "WAIT"," ->balance:",balance,"BTC"
+			print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
+			print "No quizo vender el berraco"
+			print "coin_balance: {}, btc_balance: {}".format(coin_balance,btc_balance)
+			print time, pair, close, "WAIT"," ->balance:",round(balance,5),"BTC"
 	
 	elif signal == "BUY":
 		if not have_coin:
 			coin_balance = btc_balance/close
 			btc_balance = 0.0
 			balance = coin_balance*close
-			print time, pair, close, signal," ->balance:",balance,"BTC"
+			print time, pair, close, signal," ->balance:",round(balance,5),"COIN:",coin_balance,"BTC:",btc_balance
 			have_coin = True
 		else:
-			print "have_coin: {}, not have_coin {}".format(have_coin,not have_coin)
+			print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
 			print "No quizo comprar el berraco"
-			print time, pair, close, "WAIT"," ->balance:",balance,"BTC"
+			print time, pair, close, "WAIT"," ->balance:",round(balance,5),"BTC"
 		
 	return have_coin,coin_balance,btc_balance
 

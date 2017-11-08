@@ -150,13 +150,15 @@ def marketReturn(serie):
 	"""
 
 def run_strategy(strategy,df,pair,ml_strategy,per):
-	from strategy import pricevsEMA,pricevsSMA,EMAvsEMA,EMAvsSMA,ml_logreg
+	from strategy2 import pricevsEMA,pricevsSMA,EMAvsEMA,EMAvsSMA,ml_logreg
+	from strategy import crossingStrategy
 	fun_dic = {
 	  "pricevsEMA":pricevsEMA,
 	  "pricevsSMA":pricevsSMA,
 	  "EMAvsSMA":EMAvsSMA,
 	  "EMAvsEMA":EMAvsEMA,
-	  "ml_logreg": ml_logreg
+	  "ml_logreg":ml_logreg,
+	  "crossing":crossingStrategy
 	  }
 	
 	ml_strategies = ["ml_logreg"]

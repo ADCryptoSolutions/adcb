@@ -106,4 +106,3 @@ def ml_logreg(close,per=0.9,**kwargs):
 	w_pred["w"] = w_pred["w"].shift(1)
 	
 	return w_pred
-	

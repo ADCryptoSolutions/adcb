@@ -1,9 +1,9 @@
 #-*-coding:utf-8-*-
 # ---- emetdan@gmail.com -------
 
-from bot import load_options, prepareData, marketReturn, run_strategy
+import sys, getopt
+from bot import prepareData, marketReturn, run_strategy
 from tusp import string2ts, ts2string
-import sys
 
 
 def main(argv):
@@ -12,7 +12,7 @@ def main(argv):
 	"""
 	
 	# cargando opciones del programa
-	pair, start, end, period, strategy = load_options(argv)
+	pair, period, strategy = load_PT_options(argv)
 	
 	print "\n\tLas opciones cargadas fueron:\n" 
 	print pair, period, strategy
@@ -86,6 +86,12 @@ def paper(pair, period, strategy):
 			if yn == "y" or yn =="Y" or yn =="yes" or yn =="YES":
 				print "\tSeleccionó salir. \n"
 				balance = btc_balance+coin_balance*df["close"][-1]
+				
+				# guardando el resumen del paper trading en un archivo de texto
+				with open("paper_resume_%s_%s_%s.txt"%(pair,strategy,period),"w") as paper_resume:
+					print >> paper_resume, "\tBalance: %s"%(balance)
+					print >> paper_resume, "\tProfit: {}%".format(round((balance-1)*100,2))
+				
 				print "\tBalance: %s"%(balance)
 				print "\tProfit: {}%".format(round((balance-1)*100,2))
 				print "\tHasta pronto..."
@@ -126,6 +132,58 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance):
 			print time, pair, close, "WAIT"," ->balance:",round(balance,5),"BTC"
 		
 	return have_coin,coin_balance,btc_balance
+
+def load_PT_options(argv):
+	'''
+	funcion que carga opciones de usuario de paper trading
+	'''
+	currencyPair, start, end = "BTC_DGB","2017-06-01 00:00:00","2017-06-01 00:00:00"
+	period, strategy = 3600*4,"EMAvsSMA"
+	try:
+		opts, args = getopt.getopt(argv,"hp:c:n:s:e:f:s:",["period=","currency=","points="])
+	except getopt.GetoptError:
+		print '\t Error paperBot.py. The valid option are:\n -p <period length> -c <currency pair> -s <strategy> -h <help>'
+		sys.exit(2)
+	
+	for opt, arg in opts:
+		if opt == '-h':
+			print 'paperBot.py -p <period length> -c <currency pair> -s <strategy>'
+			sys.exit()
+		elif opt in ("-p", "--period"):
+			if (int(arg) in [300,900,1800,7200,14400,86400]):
+				period = arg
+			else:
+				print 'Poloniex requires periods in 300,900,1800,7200,14400, or 86400 second increments'
+				sys.exit(2)
+		elif opt in ("-c", "--currency"):
+			currencyPair = arg
+		elif opt in ("-n", "--points"):
+			lengthOfMA = int(arg)
+		elif opt in ("-i"):
+			ts = string2ts(arg)
+			start = str(ts)
+		elif opt in ("-e"):
+			ts = string2ts(arg)
+			end = str(ts)
+		elif opt in ("-f"):
+			dic = {}
+			inputFile = open(arg).readlines()
+			
+			for line in inputFile:
+			  if line != ['']:
+				k = line.split('=')
+				dic[k[0].strip()] = k[1].strip().strip('\n')
+			currencyPair = dic["currencyPair"]
+			start = string2ts(dic["start"])
+			end = string2ts(dic["end"])
+			period = int(dic["period"])
+			strategy = dic["strategy"]
+		elif opt in ("-s"):
+			strategy = arg
+	if len(opts) == 0:
+		print "\n\tYou did not provide options. The default ones will be assumed.\n"
+		print "paperBot.py -p <period length> -c <currency pair> -s <strategy>"
+	return currencyPair, period, strategy
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

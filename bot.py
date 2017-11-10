@@ -11,7 +11,7 @@ def main(argv):
 	"""
 	
 	# cargando opciones del programa
-	pair, start, end, period, strategy = load_options(argv)
+	pair, start, end, period, strategy = load_BT_options(argv)
 	print "\n"+pair, start, end, period, strategy+"n"
 	# inicializando Dataframe
 	df = 0
@@ -40,19 +40,19 @@ def main(argv):
 	backTest(w, market_return, strategy)
 
 
-def load_options(argv):
+def load_BT_options(argv):
 	'''
 	funcion que carga opciones de usuario
 	'''
 	currencyPair, start, end = "BTC_DGB","2017-06-01 00:00:00","2017-06-01 00:00:00"
-	period, strategy = 3600*4,"EMAvsEMA"
+	period, strategy = 3600*4,"EMAvsSMA"
 	try:
 		opts, args = getopt.getopt(argv,"hp:c:n:s:e:f:s:",["period=","currency=","points="])
 	except getopt.GetoptError:
-		print ' Error trading-bot.py -p <period length>\n -c <currency pair>\n -s <start time> -e <end time> --> "YYYY:MM:DD hh:mm:ss"\
+		print ' Error trading-bot.py -p <period length> -c <currency pair> -s <start time> -e <end time> --> "YYYY:MM:DD hh:mm:ss"\
 		 -f <input file bot.inp> -s <back testing strategy>'
 		sys.exit(2)
-
+	
 	for opt, arg in opts:
 		if opt == '-h':
 			print 'trading-bot.py -p <period length> -c <currency pair> -s <start time> -e <end time> --> "YYYY:MM:DD hh:mm:ss"\
@@ -89,6 +89,8 @@ def load_options(argv):
 			strategy = dic["strategy"]
 		elif opt in ("-s"):
 			strategy = arg
+	if len(opts) == 0:
+		print "No proporcionó opciones. Se tomarán las predeterminadas."
 	return currencyPair, start, end, period, strategy
 
 

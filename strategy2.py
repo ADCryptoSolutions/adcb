@@ -7,7 +7,7 @@ from profit import change5
 from orders import orders
 from mldata import ml_data
 from sklearn.linear_model import LogisticRegression
-
+import sys
 # dada una serie de pandas o una lista y el numero de muestras para la EMA y SMA devuelve vector w
 # considerando el cruce entre EMA y SMA
 def EMAvsSMA(serie, smaPeriod=20,emaPeriod=5):
@@ -157,6 +157,10 @@ def ml_logreg(close,per=0.9,**kwargs):
 	# creando dataframe con los valores del diccionario
 	data = pd.DataFrame(data=dic)
 	
+	# quitando valores NaN  
+	data.replace([np.inf,-np.inf], np.nan,inplace=True)
+	data.fillna(method='bfill',inplace=True)
+	
 	# separando datos para crear y evaluar el modelo de machine learning.
 	# se toma train desde 1 para no tener NaN de la primera fila
 	train = data[1:int(len(data)*per)]
@@ -164,12 +168,16 @@ def ml_logreg(close,per=0.9,**kwargs):
 	
 	# iniciando modelo de regresion logistica
 	logreg = LogisticRegression()
-	# entrenando el modelo
 	try:
+		# entrenando el modelo
 		logreg.fit(train.drop(["best_w","close"],axis=1),train["best_w"])
-	except ValueError:
-		print train.isnull().any()
+	except ValueError as va:
+		print data.isnull().any()
 		print train[train['rsi'].isnull()]
+		print train[train['rsi'] == np.inf]
+		logreg.fit(train.drop(["best_w","close"],axis=1),train["best_w"])
+		sys.exit(1)
+	
 	# prediciendo con el modelo
 	pred = logreg.predict(test.drop(["best_w","close"],axis=1))
 	

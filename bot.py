@@ -169,18 +169,20 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
 	
 	if ml_strategy:
 		from stockstats import StockDataFrame
+		from indicators import rsi
 		
 		#Creando indicadores para estrategia, via stockstats
 		stock = StockDataFrame.retype(df.copy())
 		stock["rsi_14"];
-		stock["macd"];
-		stock["macds"];
 		stock["cci"];
-		stock["wr_14"];
 		
-		stock.fillna(method='ffill',inplace=True)
+		#RSI1, df_rsi = rsi(df["close"])
+		
 		# Caracteristicas sobre las que se entrenara el modelo
 		feature_dic = {"rsi":stock["rsi_14"],"cci":stock["cci"],"price":df["close"]}
+		
+		#print df_rsi.isnull().any()
+		#print df_rsi[df_rsi['RS1'].isnull()]
 		
 		# Creando vector de pesos utilizando estrategia de ML de regresión logística
 		w = fun_dic[strategy](df["close"],per=per,**feature_dic)		

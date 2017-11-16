@@ -2,9 +2,8 @@
 # ---- emetdan@gmail.com -------
 
 import sys, getopt
-from bot import prepareData, marketReturn, run_strategy
-from tusp import string2ts, ts2string
-
+from bot import prepareData, run_strategy
+from tusp import string2ts
 
 def main(argv):
 	"""
@@ -34,7 +33,7 @@ def paper(pair, period, strategy):
 	# en esta lista deben guardarse los nombres de todas las estrategias
 	# de machine learning en strategy, para discriminar en base a estas
 	# la cantindad de datos a traer
-	ml_strategies = ["ml_logreg"]
+	ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn"]
 	
 	delta = timedelta(seconds = period)
 	
@@ -174,8 +173,6 @@ def load_PT_options(argv):
 				k = line.split('=')
 				dic[k[0].strip()] = k[1].strip().strip('\n')
 			currencyPair = dic["currencyPair"]
-			start = string2ts(dic["start"])
-			end = string2ts(dic["end"])
 			period = int(dic["period"])
 			strategy = dic["strategy"]
 		elif opt in ("-s"):

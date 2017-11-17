@@ -43,6 +43,36 @@ def EMAvsSMA(serie, smaPeriod=20, emaPeriod=5):
     """
     return w
 
+
+def SMAvsSMA(serie, smaPeriod=20, emaPeriod=10):
+    # Calculando media movil a 20 muestras
+    sma = serie.rolling(smaPeriod, min_periods=1).mean()
+    # caculando exponential movil average
+    ema = serie.rolling(emaPeriod, min_periods=1).mean()
+
+    # Encontrando el signo de la resta entre ellas para encontrar los cruces
+    dif = (ema - sma).apply(np.sign)
+
+    w = pd.DataFrame(data={"w": (dif+1)/2})
+
+    w['w'] = w['w'].apply(change5)
+
+    w["orders"] = orders(w["w"])
+    w['w'] = w['w'].shift(1)
+    w["price"] = serie
+
+    """
+    plt.figure()
+    plt.plot(serie.index,serie,'g',label='precio')
+    plt.plot(serie.index,ema,'r',label='EMA_%s'%emaPeriod)
+    plt.plot(serie.index,sma,'b',label='SMA_%s'%smaPeriod)
+    plt.legend(loc='best')
+    plt.ylabel('Price (BTC)')
+    plt.grid()
+    plt.show()
+    """
+    return w
+
 # dada una serie de pandas y el numero de muestras para las EMAs devuelve
 # vector w considerando el cruce entre estas
 

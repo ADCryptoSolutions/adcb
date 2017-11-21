@@ -110,7 +110,6 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
     
     
     polo = Poloniex()
-    print start
     # historyData es una lista de diccionarios python
     # candlestick period in seconds; valid values are 300, 900, 1800, 7200, 14400, and 86400
     historyData = polo.returnChartData(currencyPair=pair,
@@ -130,11 +129,30 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
     df['weightedAverage'] = pd.to_numeric(df['weightedAverage'])
     df['high'] = pd.to_numeric(df['high'])
     df['open'] = pd.to_numeric(df['open'])
+    
+    # calculando volatilidad en función del tamaño de las velas
+    df["volatility"] = makeVolatility(df,2)
 
     # seleccionando la columna de fecha como indice
     df = df.set_index("date")
     
     return df
+
+
+def makeVolatility(df, c=2.0):
+    """
+    Calcula la volatilidad en función  del tamaño de las velas
+    """
+
+    # distancia entre el precio más alto y el más bajo
+    highLow = abs(df["high"]-df["low"])
+    # distancia entre el precio de apertura y el de cierre
+    openClose = abs(df["open"]-df["close"])
+    
+    volatile = highLow <= 2.0*openClose
+    
+    return volatile
+
 
 def marketReturn(serie):
     

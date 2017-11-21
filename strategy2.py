@@ -3,7 +3,7 @@
 import pandas as pd
 import numpy as np
 from profit import change5
-from orders import orders
+from orders import orders, volatility_corection
 from mldata import ml_data
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -26,6 +26,43 @@ def EMAvsSMA(serie, smaPeriod=20, emaPeriod=5):
     w = pd.DataFrame(data={"w": (dif+1)/2})
 
     w['w'] = w['w'].apply(change5)
+
+    w["orders"] = orders(w["w"])
+    w['w'] = w['w'].shift(1)
+    w["price"] = serie
+
+    """
+    plt.figure()
+    plt.plot(serie.index,serie,'g',label='precio')
+    plt.plot(serie.index,ema,'r',label='EMA_%s'%emaPeriod)
+    plt.plot(serie.index,sma,'b',label='SMA_%s'%smaPeriod)
+    plt.legend(loc='best')
+    plt.ylabel('Price (BTC)')
+    plt.grid()
+    plt.show()
+    """
+    return w
+
+
+def EMAvsSMA2(serie, volatility, smaPeriod=20, emaPeriod=5):
+    """
+    Cruce de medias corregido por volatilidad
+    """
+
+    # Calculando media movil a 20 muestras
+    sma = serie.rolling(smaPeriod, min_periods=1).mean()
+    # caculando exponential movil average
+    ema = serie.ewm(span=emaPeriod, adjust=False).mean()
+
+    # Encontrando el signo de la resta entre ellas para encontrar los cruces
+    dif = (ema - sma).apply(np.sign)
+
+    w = pd.DataFrame(data={"w": (dif+1)/2})
+
+    w['w'] = w['w'].apply(change5)
+
+    # corrigiendo por volatilidad
+    w["w"] = volatility_corection(w["w"], volatility)
 
     w["orders"] = orders(w["w"])
     w['w'] = w['w'].shift(1)
@@ -109,10 +146,12 @@ def EMAvsEMA(serie, smaPeriod=20, emaPeriod=5):
     """
     return w
 
-# dada una serie de pandas y el numero de muestras para la EMA devuelve vector w
-# considerando el cruce entre EMA y el precio
-def pricevsEMA(serie, emaPeriod=5):
 
+def pricevsEMA(serie, emaPeriod=5):
+    """
+    dada una serie de pandas y el numero de muestras para la EMA devuelve el
+    vector w considerando el cruce entre EMA y el precio
+    """
     # precio
     ema = serie
     # caculando exponential movil average rapida

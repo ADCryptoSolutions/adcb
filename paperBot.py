@@ -73,7 +73,7 @@ def paper(pair, period, strategy):
             # corriendo estrategia. Generando vector w
             w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
             
-            have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),w["orders"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance)
+            have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),w["orders"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance, strategy)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
             
             # se recarga cada period segundos
@@ -101,7 +101,7 @@ def paper(pair, period, strategy):
                 pass
 
 # imprime en pantalla deacuerdo a la señal dada
-def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance):
+def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,strategy):
     balance = btc_balance + coin_balance*close
     if signal == "WAIT":
         print time, pair, close, signal," ->balance:",round(balance,5),"BTC"
@@ -111,6 +111,7 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance):
             btc_balance = coin_balance*close
             coin_balance = 0.0
             balance = btc_balance
+            print "\n\tEstrategia: ",strategy,"\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN",coin_balance,"BTC",btc_balance
             have_coin = False
         else:
@@ -124,6 +125,7 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance):
             coin_balance = btc_balance/close
             btc_balance = 0.0
             balance = coin_balance*close
+            print "\n\tEstrategia: ",strategy,"\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN:",coin_balance,"BTC:",btc_balance
             have_coin = True
         else:

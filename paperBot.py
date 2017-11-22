@@ -117,7 +117,7 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,s
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
             #print "No quizo vender el berraco"
-            print "coin_balance: {}, btc_balance: {}".format(coin_balance,btc_balance)
+            #print "coin_balance: {}, btc_balance: {}".format(coin_balance,btc_balance)
             print time, pair, close, "WAIT"," ->balance:",round(balance,5),"BTC"
     
     elif signal == "BUY":

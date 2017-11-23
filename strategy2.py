@@ -81,7 +81,7 @@ def SMAvsSMA(serie, smaPeriod=20, emaPeriod=10):
     return w
 
 
-def SMAvsSMA2(serie, smaPeriod=20, emaPeriod=10):
+def SMAvsSMA2(serie,  volatility, smaPeriod=20, emaPeriod=10):
     # Calculando media movil a 20 muestras
     sma = serie.rolling(smaPeriod, min_periods=1).mean()
     # Calculando media movil a 10 muestrase

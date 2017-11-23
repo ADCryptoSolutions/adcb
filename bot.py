@@ -131,7 +131,7 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
     df['open'] = pd.to_numeric(df['open'])
     
     # calculando volatilidad en función del tamaño de las velas
-    df["volatility"] = makeVolatility(df,2)
+    df["volatility"] = makeVolatility(df)
 
     # seleccionando la columna de fecha como indice
     df = df.set_index("date")
@@ -148,8 +148,8 @@ def makeVolatility(df, c=2.0):
     highLow = abs(df["high"]-df["low"])
     # distancia entre el precio de apertura y el de cierre
     openClose = abs(df["open"]-df["close"])
-    
-    volatile = highLow <= 2.0*openClose
+
+    volatile = highLow <= c*openClose
     
     return volatile
 
@@ -172,18 +172,23 @@ def marketReturn(serie):
     """
 
 def run_strategy(strategy,df,pair,ml_strategy,per):
-    from strategy2 import pricevsEMA,pricevsSMA,EMAvsEMA,EMAvsSMA
+    from strategy2 import pricevsEMA, pricevsSMA, EMAvsEMA, EMAvsSMA
+    from strategy2 import SMAvsSMA, EMAvsSMA2, SMAvsSMA2
     from strategy2 import ml_randfor, ml_logreg, ml_knn
-    from strategy import crossingStrategy
+    from strategy import crossingStrategy, crossingStrategy2
     fun_dic = {
       "pricevsEMA": pricevsEMA,
       "pricevsSMA": pricevsSMA,
+      "SMAvsSMA": SMAvsSMA,
+      "SMAvsSMA2": SMAvsSMA2,
       "EMAvsSMA": EMAvsSMA,
+      "EMAvsSMA2": EMAvsSMA2,
       "EMAvsEMA": EMAvsEMA,
       "ml_logreg": ml_logreg,
       "ml_randfor": ml_randfor,
       "ml_knn": ml_knn,
-      "crossing":crossingStrategy
+      "crossing":crossingStrategy,
+      "crossing2":crossingStrategy2
       }
     
     #ml_strategies = ["ml_logreg", "ml_randfor"]
@@ -215,7 +220,11 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
         # a la estrategia i.e. cuando se compra y 
         # cuando se vende.
         try:
-            w = fun_dic[strategy](df["close"])
+			# si la estrategia incluye filtro por volatilidad
+			if strategy == "EMAvsSMA2" or strategy == "SMAvsSMA2" or strategy == "crossing2":
+				w = fun_dic[strategy](df["close"],df["volatility"])
+			else:
+				w = fun_dic[strategy](df["close"])
         except KeyError:
             print "\n La estrategia %s no es valida. Las estrategias disponibles son:\n"%strategy
             for key in fun_dic.keys():

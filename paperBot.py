@@ -33,14 +33,11 @@ def paper(pair, period, strategy):
     # en esta lista deben guardarse los nombres de todas las estrategias
     # de machine learning en strategy, para discriminar en base a estas
     # la cantindad de datos a traer
-    ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn"]
-    
-    delta = timedelta(seconds = period)
-    
+    ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn"]    
+    delta = timedelta(seconds = period)    
     ml_strategy = False
     have_coin = False
     len_data = 0
-
     # en el caso de una estrategía de ML porcentaje de datos que se utilizanran 
     # en el conjunto de datos de entrenamiento
     per = 0.95
@@ -56,14 +53,15 @@ def paper(pair, period, strategy):
     else: 
         # para estrategias diferentes a las de ML se toman los últimos
         # 50 datos
-        len_data = 50
+        len_data = 40
 
     while True:
         try:        
-            # definiendo end como el tiempo UTC actual
-            tf = datetime.utcnow()
+            # definiendo end como la hora local actual
+            tf = datetime.now()
+            # convirtiendola a formato unix time (es equivalente a UTC)
             end = string2ts(tf.strftime('%Y-%m-%d %H:%M:%S'))
-            start = end 
+            #start = end 
             
             # definiendo el tiempo inicial de la consulta 
             to = tf-delta*len_data
@@ -71,11 +69,11 @@ def paper(pair, period, strategy):
                 
             # trayendo y preparando datos
             df = prepareData(pair=pair, start=start, end=end, period=int(period))
-            
+            #print "El total de datos descargados es: ",len(df)
             # corriendo estrategia. Generando vector w
             w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
             
-            have_coin,coin_balance,btc_balance = run_paper_signal(tf.strftime('%Y-%m-%d %H:%M:%S'),w["orders"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance)
+            have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),w["orders"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance, strategy)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
             
             # se recarga cada period segundos
@@ -103,7 +101,7 @@ def paper(pair, period, strategy):
                 pass
 
 # imprime en pantalla deacuerdo a la señal dada
-def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance):
+def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,strategy):
     balance = btc_balance + coin_balance*close
     if signal == "WAIT":
         print time, pair, close, signal," ->balance:",round(balance,5),"BTC"
@@ -113,12 +111,13 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance):
             btc_balance = coin_balance*close
             coin_balance = 0.0
             balance = btc_balance
+            print "\n\tEstrategia: ",strategy,"\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN",coin_balance,"BTC",btc_balance
             have_coin = False
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
             #print "No quizo vender el berraco"
-            print "coin_balance: {}, btc_balance: {}".format(coin_balance,btc_balance)
+            #print "coin_balance: {}, btc_balance: {}".format(coin_balance,btc_balance)
             print time, pair, close, "WAIT"," ->balance:",round(balance,5),"BTC"
     
     elif signal == "BUY":
@@ -126,6 +125,7 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance):
             coin_balance = btc_balance/close
             btc_balance = 0.0
             balance = coin_balance*close
+            print "\n\tEstrategia: ",strategy,"\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN:",coin_balance,"BTC:",btc_balance
             have_coin = True
         else:
@@ -140,7 +140,7 @@ def load_PT_options(argv):
     funcion que carga opciones de usuario de paper trading
     '''
     currencyPair, start, end = "BTC_DGB","2017-06-01 00:00:00","2017-06-01 00:00:00"
-    period, strategy = 3600*4,"EMAvsSMA"
+    period, strategy = 300,"EMAvsSMA"
     try:
         opts, args = getopt.getopt(argv,"hp:c:n:s:e:f:s:",["period=","currency=","points="])
     except getopt.GetoptError:

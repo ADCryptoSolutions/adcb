@@ -148,7 +148,7 @@ def makeVolatility(df, c=2.0):
     highLow = abs(df["high"]-df["low"])
     # distancia entre el precio de apertura y el de cierre
     openClose = abs(df["open"]-df["close"])
-    
+
     volatile = highLow <= c*openClose
     
     return volatile
@@ -172,12 +172,15 @@ def marketReturn(serie):
     """
 
 def run_strategy(strategy,df,pair,ml_strategy,per):
-    from strategy2 import pricevsEMA,pricevsSMA,EMAvsEMA,EMAvsSMA,EMAvsSMA2
+    from strategy2 import pricevsEMA, pricevsSMA, EMAvsEMA, EMAvsSMA
+    from strategy2 import SMAvsSMA, EMAvsSMA2, SMAvsSMA2
     from strategy2 import ml_randfor, ml_logreg, ml_knn
     from strategy import crossingStrategy, crossingStrategy2
     fun_dic = {
       "pricevsEMA": pricevsEMA,
       "pricevsSMA": pricevsSMA,
+      "SMAvsSMA": SMAvsSMA,
+      "SMAvsSMA2": SMAvsSMA2,
       "EMAvsSMA": EMAvsSMA,
       "EMAvsSMA2": EMAvsSMA2,
       "EMAvsEMA": EMAvsEMA,
@@ -218,7 +221,7 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
         # cuando se vende.
         try:
 			# si la estrategia incluye filtro por volatilidad
-			if strategy == "EMAvsSMA2" or strategy == "crossing2":
+			if strategy == "EMAvsSMA2" or strategy == "SMAvsSMA2" or strategy == "crossing2":
 				w = fun_dic[strategy](df["close"],df["volatility"])
 			else:
 				w = fun_dic[strategy](df["close"])

@@ -108,7 +108,7 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
     #import json
     #import pylab as plt
     
-    
+    #print conn.returnBalances()['BTC']
     polo = Poloniex()
     # historyData es una lista de diccionarios python
     # candlestick period in seconds; valid values are 300, 900, 1800, 7200, 14400, and 86400
@@ -289,7 +289,52 @@ def ml_init_time(end,start,per):
     
     return int(time.mktime(t_tuple))
 
-        
+
+def prepareLiveData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"), 
+                 end=string2ts("2017-09-01 00:00:00"), period=3600*4):
+    
+    """
+    funcion que trae los datos y 
+    los devuleve en dataframe de pandas
+    """
+
+    from poloniex import Poloniex
+    #import json
+    #import pylab as plt
+    
+    poloKeys = open("../.kp").readlines()            
+    polo = Poloniex(poloKeys[0].strip(),poloKeys[1].strip())
+    #print conn.returnBalances()['BTC']
+    #polo = Poloniex()
+    # historyData es una lista de diccionarios python
+    # candlestick period in seconds; valid values are 300, 900, 1800, 7200, 14400, and 86400
+    historyData = polo.returnChartData(currencyPair=pair,
+                         start=start,
+                         end=end,
+                         period=period)
+
+    # convirtiendo datos en data frame
+    df = pd.DataFrame(historyData)
+
+    #  convirtiendo string a float o int
+    df["close"] =pd.to_numeric(df['close'])
+    df["open"] =pd.to_numeric(df['open'])
+    df["low"] =pd.to_numeric(df['low'])
+    df["volume"] =pd.to_numeric(df['volume'])
+    df["date"] = pd.to_datetime(df["date"].apply(ts2string))
+    df['weightedAverage'] = pd.to_numeric(df['weightedAverage'])
+    df['high'] = pd.to_numeric(df['high'])
+    df['open'] = pd.to_numeric(df['open'])
+    
+    # calculando volatilidad en función del tamaño de las velas
+    df["volatility"] = makeVolatility(df)
+
+    # seleccionando la columna de fecha como indice
+    df = df.set_index("date")
+    
+    return df, polo
+
+
 if __name__ == "__main__":
     main(sys.argv[1:])
 

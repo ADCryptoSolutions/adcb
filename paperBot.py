@@ -34,7 +34,10 @@ def paper(pair, period, strategy):
     # de machine learning en strategy, para discriminar en base a estas
     # la cantindad de datos a traer
     ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn"]    
-    delta = timedelta(seconds = period)    
+    delta = timedelta(seconds = period)
+    
+    # desfase para en la mayoría de los casos no entrar al while
+    delta3 = timedelta(seconds = 90)
     ml_strategy = False
     have_coin = False
     len_data = 0
@@ -71,11 +74,15 @@ def paper(pair, period, strategy):
             df = prepareData(pair=pair, start=start, end=end, period=int(period))
             #print "El total de datos descargados es: ",len(df)
             # corriendo estrategia. Generando vector w
+            
             w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
             
             have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),w["orders"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance, strategy)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
             
+            
+            #sys.stdout.write("\r\tPróxima actualización en: %s"%(to_sleep))
+            #sys.stdout.flush()
             # se recarga cada period segundos
             sleep(period)
         

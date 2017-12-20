@@ -1,0 +1,2 @@
+	Balance: 1.0
+	Profit: 0.0%

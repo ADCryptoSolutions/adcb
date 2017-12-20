@@ -36,6 +36,10 @@ def paper(pair, period, strategy):
     # la cantindad de datos a traer
     ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn"]    
     delta = timedelta(seconds = period)    
+    # máximo delay aceptado entre el tiempo actual y el del último dato
+    delta2 = timedelta(seconds = 100)
+    # desfase para en la mayoría de los casos no entrar al while
+    delta3 = timedelta(seconds = 90)
     ml_strategy = False
     have_coin = False
     len_data = 0
@@ -72,13 +76,42 @@ def paper(pair, period, strategy):
             df, polo = prepareLiveData(pair=pair, start=start, end=end, period=int(period))
             #print "El total de datos descargados es: ",len(df)
             # corriendo estrategia. Generando vector w
+            tt = df.index[-1]
+            de = tf - tt
+            
+            # sincronizando tiempo del bot
+            if de > delta2:
+                # mientras la diferencia entre el la hora del último precio de cierre y
+                # y la hora actual sea mayor a 120s
+                while de > delta2:
+    
+                    # definiendo end como la hora local actual
+                    tf = datetime.now()
+                    # convirtiendola a formato unix time (es equivalente a UTC)
+                    end = string2ts(tf.strftime('%Y-%m-%d %H:%M:%S')) 
+                    to = tf-delta*len_data
+                    start = string2ts(to.strftime('%Y-%m-%d %H:%M:%S'))
+                    # trayendo y preparando datos
+                    df = prepareLiveData(pair=pair, start=start, end=end, period=int(period))
+                    tt = df.index[-1]
+                    de = tf - tt
+                    sys.stdout.write("\rSincronizando bot (delay máximo aceptado 120s, actual %ss)\
+                                      \tEsperando cierre de las %s\
+                                      \túltimo cierre a las %s"%(str((de).seconds), str(tt+delta), str(tt)))
+                    sys.stdout.flush()
+                    sleep(15)
+            
+            print "\n"
+            
             w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
             
-            have_coin,coin_balance,btc_balance = run_paper_signal(polo, str(df.index[-1]),w["orders"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance, strategy)
+            have_coin,coin_balance,btc_balance = run_live_signal(polo, str(df.index[-1]),w["orders"][-1],pair, df["close"][-1], have_coin, strategy)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
-            
+            # calibrando tiempo de espera de acuerdo a emisión de próximo dato
+            tf = datetime.now()
+            to_sleep = tt+delta-tf+delta3
             # se recarga cada period segundos
-            sleep(period)
+            sleep(to_sleep.seconds)
         
         # Saliendo del programa        
         except KeyboardInterrupt:
@@ -102,23 +135,26 @@ def paper(pair, period, strategy):
                 pass
 
 # imprime en pantalla deacuerdo a la señal dada
-def run_paper_signal(polo, time, signal,pair,close,have_coin,coin_balance,btc_balance,strategy):
+def run_live_signal(polo, time, signal, pair, close, have_coin, strategy):
+    
+    fee = 0.0025
+    
+    btc_balance = polo.returnBalances()[pair.split("_")[0]]
+    coin_balance = polo.returnBalances()[pair.split("_")[1]]
     balance = btc_balance + coin_balance*close
+    
     if signal == "WAIT":
         print time, pair, close, signal," ->balance:",round(balance,5),"BTC"
     
     elif signal == "SELL":
         if have_coin:
-            btc_balance = coin_balance*close
+            btc_balance = coin_balance*close*(1-fee)
             coin_balance = 0.0
             balance = btc_balance
             print "\n\tEstrategia: ",strategy,"\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN",coin_balance,"BTC",btc_balance
             have_coin = False
         else:
-            #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
-            #print "No quizo vender el berraco"
-            #print "coin_balance: {}, btc_balance: {}".format(coin_balance,btc_balance)
             print time, pair, close, "WAIT"," ->balance:",round(balance,5),"BTC"
     
     elif signal == "BUY":
@@ -135,6 +171,7 @@ def run_paper_signal(polo, time, signal,pair,close,have_coin,coin_balance,btc_ba
             print time, pair, close, "WAIT"," ->balance:",round(balance,5),"BTC"
         
     return have_coin,coin_balance,btc_balance
+
 
 def load_PT_options(argv):
     '''

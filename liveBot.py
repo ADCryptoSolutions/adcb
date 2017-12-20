@@ -17,7 +17,7 @@ def main(argv):
     print "\n\tLas opciones cargadas fueron:\n" 
     print pair, period, strategy
     
-    print "\n\n\tEjecutando Paper Trading\n\n"
+    print "\n\n\tEjecutando Live Trading\n\n"
     paper(pair, int(period), strategy)
 
 
@@ -92,25 +92,26 @@ def paper(pair, period, strategy):
                     to = tf-delta*len_data
                     start = string2ts(to.strftime('%Y-%m-%d %H:%M:%S'))
                     # trayendo y preparando datos
-                    df = prepareLiveData(pair=pair, start=start, end=end, period=int(period))
+                    df, polo = prepareLiveData(pair=pair, start=start, end=end, period=int(period))
                     tt = df.index[-1]
                     de = tf - tt
                     sys.stdout.write("\rSincronizando bot (delay máximo aceptado 120s, actual %ss)\
-                                      \tEsperando cierre de las %s\
-                                      \túltimo cierre a las %s"%(str((de).seconds), str(tt+delta), str(tt)))
+                                      Esperando cierre de las %s\
+                                      último cierre a las %s"%(str((de).seconds), str(tt+delta), str(tt)))
                     sys.stdout.flush()
                     sleep(15)
             
             print "\n"
             
+            #corriendo estrategia
             w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
-            
+			
             have_coin,coin_balance,btc_balance = run_live_signal(polo, str(df.index[-1]),w["orders"][-1],pair, df["close"][-1], have_coin, strategy)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
             # calibrando tiempo de espera de acuerdo a emisión de próximo dato
             tf = datetime.now()
             to_sleep = tt+delta-tf+delta3
-            # se recarga cada period segundos
+            # se recarga cada to_sleep segundos
             sleep(to_sleep.seconds)
         
         # Saliendo del programa        
@@ -139,8 +140,8 @@ def run_live_signal(polo, time, signal, pair, close, have_coin, strategy):
     
     fee = 0.0025
     
-    btc_balance = polo.returnBalances()[pair.split("_")[0]]
-    coin_balance = polo.returnBalances()[pair.split("_")[1]]
+    btc_balance = float(polo.returnBalances()[pair.split("_")[0]])
+    coin_balance = float(polo.returnBalances()[pair.split("_")[1]])
     balance = btc_balance + coin_balance*close
     
     if signal == "WAIT":

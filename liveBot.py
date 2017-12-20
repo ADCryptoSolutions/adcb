@@ -47,8 +47,7 @@ def paper(pair, period, strategy):
     # en el conjunto de datos de entrenamiento
     per = 0.95
     # dinero inicial con el que empieza el paperBot
-    btc_balance = 1.0
-    coin_balance = 0.0
+    balance = []
     # definiendo el tiempo inicial de la consulta 
     if strategy in ml_strategies:
         # para estrategias de machine learning se tomarán los últimos
@@ -95,9 +94,7 @@ def paper(pair, period, strategy):
                     df, polo = prepareLiveData(pair=pair, start=start, end=end, period=int(period))
                     tt = df.index[-1]
                     de = tf - tt
-                    sys.stdout.write("\rSincronizando bot (delay máximo aceptado 120s, actual %ss)\
-                                      Esperando cierre de las %s\
-                                      último cierre a las %s"%(str((de).seconds), str(tt+delta), str(tt)))
+                    sys.stdout.write("\rSincronizando bot (delay máximo aceptado 120s, actual %ss). Esperando cierre de las %s. Último dato de cierre a las %s"%(str((de).seconds), str(tt+delta), str(tt)))
                     sys.stdout.flush()
                     sleep(15)
             
@@ -106,7 +103,7 @@ def paper(pair, period, strategy):
             #corriendo estrategia
             w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
 			
-            have_coin,coin_balance,btc_balance = run_live_signal(polo, str(df.index[-1]),w["orders"][-1],pair, df["close"][-1], have_coin, strategy)
+            have_coin,coin_balance,btc_balance = run_live_signal(polo, str(df.index[-1]),w["orders"][-1],pair, df["close"][-1], have_coin, strategy, balance)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
             # calibrando tiempo de espera de acuerdo a emisión de próximo dato
             tf = datetime.now()
@@ -119,16 +116,19 @@ def paper(pair, period, strategy):
             
             yn = raw_input("\n\n\tDo you want to quit (y/n)? ")
             if yn == "y" or yn =="Y" or yn =="yes" or yn =="YES":
-                print "\tSeleccionó salir. \n"
-                balance = btc_balance+coin_balance*df["close"][-1]
+                print "\tSeleccionó salir. \n" 
                 
                 # guardando el resumen del paper trading en un archivo de texto
-                with open("paper_resume_%s_%s_%s.txt"%(pair,strategy,period),"w") as paper_resume:
-                    print >> paper_resume, "\tBalance: %s"%(balance)
-                    print >> paper_resume, "\tProfit: {}%".format(round((balance-1)*100,2))
+                with open("paper_resume_%s_%s_%s.txt"%(pair, strategy, period),"w") as paper_resume:
+					try:
+						print >> paper_resume, "\tBalance: %s"%(balance[-1])
+					except IndexError:
+						print "\tHasta pronto..."
+						sys.exit()
+					print >> paper_resume, "\tProfit: {}%".format(round((balance[-1]-balance[0])/balance[0]*100, 2))
                 
-                print "\tBalance: %s"%(balance)
-                print "\tProfit: {}%".format(round((balance-1)*100,2))
+                print "\tBalance: %s"%(balance[-1])
+                print "\tProfit: {}%".format(round((balance[-1]-balance[0])/balance[0]*100,2))
                 print "\tHasta pronto..."
                 sys.exit(1)
             elif yn == "n" or yn == "N" or yn == "no" or yn == "NO":
@@ -136,40 +136,45 @@ def paper(pair, period, strategy):
                 pass
 
 # imprime en pantalla deacuerdo a la señal dada
-def run_live_signal(polo, time, signal, pair, close, have_coin, strategy):
+def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balance):
     
     fee = 0.0025
-    
     btc_balance = float(polo.returnBalances()[pair.split("_")[0]])
     coin_balance = float(polo.returnBalances()[pair.split("_")[1]])
-    balance = btc_balance + coin_balance*close
+    balance.append(btc_balance + coin_balance*close)
     
     if signal == "WAIT":
-        print time, pair, close, signal," ->balance:",round(balance,5),"BTC"
+        print time, pair, close, signal," ->balance:",round(balance[-1], 5),"BTC"
     
     elif signal == "SELL":
         if have_coin:
+			# colocando orden de venta de todas las monedas que tenemos 
+			# para el par deseado, al último precio de cierre.
+			#order = polo.sell(pair, close, coin_balance)
             btc_balance = coin_balance*close*(1-fee)
             coin_balance = 0.0
-            balance = btc_balance
+            balance[-1] = btc_balance
             print "\n\tEstrategia: ",strategy,"\n"
-            print time, pair, close, signal," ->balance:",round(balance,5),"COIN",coin_balance,"BTC",btc_balance
+            print time, pair, close, signal," ->balance:",round(balance[-1], 5),"COIN",coin_balance,"BTC",btc_balance
             have_coin = False
         else:
-            print time, pair, close, "WAIT"," ->balance:",round(balance,5),"BTC"
+            print time, pair, close, "WAIT"," ->balance:",round(balance[-1], 5),"BTC"
     
     elif signal == "BUY":
         if not have_coin:
-            coin_balance = btc_balance/close
+			# colocando orden de compra de todas las monedas que tenemos 
+			# para el par deseado, al último precio de cierre.
+			#order = polo.buy(pair, close, btc_balance)
+            coin_balance = (btc_balance/close)*(1-fee)
             btc_balance = 0.0
-            balance = coin_balance*close
+            balance[-1] = coin_balance*close
             print "\n\tEstrategia: ",strategy,"\n"
-            print time, pair, close, signal," ->balance:",round(balance,5),"COIN:",coin_balance,"BTC:",btc_balance
+            print time, pair, close, signal," ->balance:",round(balance[-1], 5),"COIN:",coin_balance,"BTC:",btc_balance
             have_coin = True
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
             #print "No quizo comprar el berraco"
-            print time, pair, close, "WAIT"," ->balance:",round(balance,5),"BTC"
+            print time, pair, close, "WAIT"," ->balance:",round(balance[-1], 5),"BTC"
         
     return have_coin,coin_balance,btc_balance
 
@@ -224,6 +229,15 @@ def load_PT_options(argv):
         print "paperBot.py -p <period length> -c <currency pair> -s <strategy>"
     return currencyPair, period, strategy
 
+def trading_supervisor(polo, balance, order):
+	if balance[-1] <= -10:
+		cancel_order = polo.cancelOrder(order["orderNumber"])
+		print "\t\nCancelando ordenes abiertas y parando el bot debido a bajo rendimiento\n"
+		sys.exit()
+
+def bot_off(polo, order):
+	cancel_order = polo.cancelOrder(order["orderNumber"])
+	sys.exit()
 
 if __name__ == "__main__":
     main(sys.argv[1:])

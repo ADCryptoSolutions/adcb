@@ -37,7 +37,7 @@ def paper(pair, period, strategy):
     ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn"]    
     delta = timedelta(seconds = period)    
     # máximo delay aceptado entre el tiempo actual y el del último dato
-    delta2 = timedelta(seconds = 100)
+    delta2 = timedelta(seconds = 180)
     # desfase para en la mayoría de los casos no entrar al while
     delta3 = timedelta(seconds = 90)
     ml_strategy = False
@@ -103,7 +103,7 @@ def paper(pair, period, strategy):
             #corriendo estrategia
             w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
 			
-            have_coin,coin_balance,btc_balance = run_live_signal(polo, str(df.index[-1]),w["orders"][-1],pair, df["close"][-1], have_coin, strategy, balance)
+            have_coin,coin_balance,btc_balance, order = run_live_signal(polo, str(df.index[-1]),w["orders"][-1],pair, df["close"][-1], have_coin, strategy, balance)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
             # calibrando tiempo de espera de acuerdo a emisión de próximo dato
             tf = datetime.now()
@@ -130,7 +130,7 @@ def paper(pair, period, strategy):
                 print "\tBalance: %s"%(balance[-1])
                 print "\tProfit: {}%".format(round((balance[-1]-balance[0])/balance[0]*100,2))
                 print "\tHasta pronto..."
-                sys.exit(1)
+                bot_off(polo, order)
             elif yn == "n" or yn == "N" or yn == "no" or yn == "NO":
                 print "\tSeleccionó seguir"
                 pass
@@ -143,6 +143,11 @@ def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balanc
     coin_balance = float(polo.returnBalances()[pair.split("_")[1]])
     balance.append(btc_balance + coin_balance*close)
     
+    if coin_balance != 0.0: have_coin = True
+    else: have_coin = False
+    
+    order = []
+    
     if signal == "WAIT":
         print time, pair, close, signal," ->balance:",round(balance[-1], 5),"BTC"
     
@@ -150,13 +155,12 @@ def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balanc
         if have_coin:
 			# colocando orden de venta de todas las monedas que tenemos 
 			# para el par deseado, al último precio de cierre.
-			#order = polo.sell(pair, close, coin_balance)
-            btc_balance = coin_balance*close*(1-fee)
-            coin_balance = 0.0
-            balance[-1] = btc_balance
-            print "\n\tEstrategia: ",strategy,"\n"
-            print time, pair, close, signal," ->balance:",round(balance[-1], 5),"COIN",coin_balance,"BTC",btc_balance
-            have_coin = False
+			order = polo.sell(pair, close, coin_balance)
+			btc_balance = coin_balance*close*(1-fee)
+			coin_balance = 0.0
+			balance[-1] = btc_balance
+			print "\n\tEstrategia: ",strategy,"\n"
+			print time, pair, close, signal," ->balance:",round(balance[-1], 5),"COIN",coin_balance,"BTC",btc_balance
         else:
             print time, pair, close, "WAIT"," ->balance:",round(balance[-1], 5),"BTC"
     
@@ -164,19 +168,21 @@ def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balanc
         if not have_coin:
 			# colocando orden de compra de todas las monedas que tenemos 
 			# para el par deseado, al último precio de cierre.
-			#order = polo.buy(pair, close, btc_balance)
-            coin_balance = (btc_balance/close)*(1-fee)
-            btc_balance = 0.0
-            balance[-1] = coin_balance*close
-            print "\n\tEstrategia: ",strategy,"\n"
-            print time, pair, close, signal," ->balance:",round(balance[-1], 5),"COIN:",coin_balance,"BTC:",btc_balance
-            have_coin = True
+			order = polo.buy(pair, close, btc_balance)
+			coin_balance = (btc_balance/close)*(1-fee)
+			btc_balance = 0.0
+			balance[-1] = coin_balance*close
+			print "\n\tEstrategia: ",strategy,"\n"
+			print time, pair, close, signal," ->balance:",round(balance[-1], 5),"COIN:",coin_balance,"BTC:",btc_balance
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
             #print "No quizo comprar el berraco"
             print time, pair, close, "WAIT"," ->balance:",round(balance[-1], 5),"BTC"
         
-    return have_coin,coin_balance,btc_balance
+        # supervisando que la extrategia no esté perdiendo más del 10%
+        trading_supervisor(polo, balance, order)
+        
+    return have_coin, coin_balance, btc_balance, order
 
 
 def load_PT_options(argv):
@@ -193,7 +199,7 @@ def load_PT_options(argv):
     
     for opt, arg in opts:
         if opt == '-h':
-            print 'paperBot.py -p <period length> -c <currency pair> -s <strategy>'
+            print 'liveBot.py -p <period length> -c <currency pair> -s <strategy>'
             sys.exit()
         elif opt in ("-p", "--period"):
             if (int(arg) in [300,900,1800,7200,14400,86400]):
@@ -230,13 +236,14 @@ def load_PT_options(argv):
     return currencyPair, period, strategy
 
 def trading_supervisor(polo, balance, order):
-	if balance[-1] <= -10:
-		cancel_order = polo.cancelOrder(order["orderNumber"])
-		print "\t\nCancelando ordenes abiertas y parando el bot debido a bajo rendimiento\n"
-		sys.exit()
+	if order != []:
+		if balance[-1] <= -10:
+			print "\t\nCancelando ordenes abiertas y parando el bot debido a bajo rendimiento\n"
+			bot_off(polo, order)
 
 def bot_off(polo, order):
-	cancel_order = polo.cancelOrder(order["orderNumber"])
+	if order != []:
+		cancel_order = polo.cancelOrder(order["orderNumber"])
 	sys.exit()
 
 if __name__ == "__main__":

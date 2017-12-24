@@ -143,13 +143,14 @@ def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balanc
     coin_balance = float(polo.returnBalances()[pair.split("_")[1]])
     balance.append(btc_balance + coin_balance*close)
     
-    if coin_balance != 0.0: have_coin = True
+    
+    if coin_balance >= 0.00001: have_coin = True
     else: have_coin = False
     
     order = []
     
     if signal == "WAIT":
-        print time, pair, close, signal," ->balance:",round(balance[-1], 5),"BTC"
+        print time, pair, close, signal," ->balance:",round(balance[-1], 6),"BTC"
     
     elif signal == "SELL":
         if have_coin:
@@ -160,24 +161,28 @@ def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balanc
 			coin_balance = 0.0
 			balance[-1] = btc_balance
 			print "\n\tEstrategia: ",strategy,"\n"
-			print time, pair, close, signal," ->balance:",round(balance[-1], 5),"COIN",coin_balance,"BTC",btc_balance
+			print time, pair, close, signal," ->balance:",round(balance[-1], 6),"COIN",coin_balance,"BTC",btc_balance
         else:
-            print time, pair, close, "WAIT"," ->balance:",round(balance[-1], 5),"BTC"
+            print time, pair, close, "WAIT"," ->balance:",round(balance[-1], 6),"BTC"
     
     elif signal == "BUY":
         if not have_coin:
 			# colocando orden de compra de todas las monedas que tenemos 
 			# para el par deseado, al último precio de cierre.
-			order = polo.buy(pair, close, btc_balance)
+			try:
+				order = polo.buy(pair, close, btc_balance/close)
+			except:
+				print "Error al comprar"
+				print "have_coin",have_coin,"close",close,"btc_balance",btc_balance
 			coin_balance = (btc_balance/close)*(1-fee)
 			btc_balance = 0.0
 			balance[-1] = coin_balance*close
 			print "\n\tEstrategia: ",strategy,"\n"
-			print time, pair, close, signal," ->balance:",round(balance[-1], 5),"COIN:",coin_balance,"BTC:",btc_balance
+			print time, pair, close, signal," ->balance:",round(balance[-1], 6),"COIN:",coin_balance,"BTC:",btc_balance
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
             #print "No quizo comprar el berraco"
-            print time, pair, close, "WAIT"," ->balance:",round(balance[-1], 5),"BTC"
+            print time, pair, close, "WAIT"," ->balance:",round(balance[-1], 6),"BTC"
         
         # supervisando que la extrategia no esté perdiendo más del 10%
         trading_supervisor(polo, balance, order)

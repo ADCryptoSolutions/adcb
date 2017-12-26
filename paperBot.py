@@ -4,6 +4,8 @@
 import sys, getopt
 from bot import prepareData, run_strategy
 from tusp import string2ts
+from signal_mail import correo
+
 
 def main(argv):
     """
@@ -120,6 +122,7 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,s
             balance = btc_balance
             print "\n\tEstrategia: ",strategy,"\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN",coin_balance,"BTC",btc_balance
+            correo(signal, time, pair, close, coin_balance, btc_balance, balance)
             have_coin = False
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
@@ -134,6 +137,7 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,s
             balance = coin_balance*close
             print "\n\tEstrategia: ",strategy,"\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN:",coin_balance,"BTC:",btc_balance
+            correo(signal, time, pair, close, coin_balance, btc_balance, balance)
             have_coin = True
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)

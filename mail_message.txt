@@ -1,0 +1,7 @@
+Orden %s puesta a las %s del %s.
+
+  Par: %s
+  precio: %s
+  Balance %s: %s
+  Balance %s: %s
+  Balance total: %s %s

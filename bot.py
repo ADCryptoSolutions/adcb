@@ -335,6 +335,18 @@ def prepareLiveData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
     return df, polo
 
 
+def sortino_ratio(rets):
+	""" Calcula en ratio de Sortino
+	
+	"""
+
+	semi_var = rets[rets < 0] ** 2
+	semi_var = semi_var.sum()/len(rets)
+	sortino = np.sqrt(semi_var)
+
+	return rets.mean()/sortino
+	
+	
 if __name__ == "__main__":
     main(sys.argv[1:])
 

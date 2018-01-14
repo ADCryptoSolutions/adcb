@@ -10,7 +10,8 @@ from sklearn.linear_model import LogisticRegression
 from core import movingAverage
 
 # dada una serie de pandas o una lista, el tamaño de la ventanas de las medias móviles, y la definición de los tipos de series, devuelve vector w a partir de los cruces de las mismas.
-def crossingStrategy(serie,serieType1=1,serieType2=2,longPeriod=20,shortPeriod=5):
+def crossingStrategy(serie,serieType1=1,serieType2=2,longPeriod=5,shortPeriod=3):
+    
     #La "serie1" suele escogerse como una serie en fase y/0 suavizada de "serie"
     if serieType1==0:
         serie1=serie
@@ -20,6 +21,11 @@ def crossingStrategy(serie,serieType1=1,serieType2=2,longPeriod=20,shortPeriod=5
         serie1 = serie.ewm(span=shortPeriod, adjust=False).mean()#exponential moving average centrada rápida
     elif serieType1==3:
         serie1 = serie.ewm(span=longPeriod, adjust=False).mean()#exponential moving average centrada lenta
+    elif serieType1==4:
+        serie1=movingAverage(serie,longPeriod,1,-1)#moving average adelantada(como rolling)
+    elif serieType1==5:
+        serie1=movingAverage(serie,longPeriod,1,1) #moving average atrasada% 
+    
     
     #La "serie2" suele escogerse como una serie desfasada suavizada de "serie".    
     if serieType2==0:
@@ -50,7 +56,7 @@ def crossingStrategy(serie,serieType1=1,serieType2=2,longPeriod=20,shortPeriod=5
 
 
 # dada una serie de pandas o una lista, el tamaño de la ventanas de las medias móviles, y la definición de los tipos de series, devuelve vector w a partir de los cruces de las mismas.
-def crossingStrategy2(serie, volatility, serieType1=1,serieType2=2,longPeriod=20,shortPeriod=5):
+def crossingStrategy2(serie, volatility, serieType1=1,serieType2=2,longPeriod=5,shortPeriod=3):
     #La "serie1" suele escogerse como una serie en fase y/0 suavizada de "serie"
     if serieType1==0:
         serie1=serie
@@ -60,6 +66,11 @@ def crossingStrategy2(serie, volatility, serieType1=1,serieType2=2,longPeriod=20
         serie1 = serie.ewm(span=shortPeriod, adjust=False).mean()#exponential moving average centrada rápida
     elif serieType1==3:
         serie1 = serie.ewm(span=longPeriod, adjust=False).mean()#exponential moving average centrada lenta
+    elif serieType1==4:
+        serie2=movingAverage(serie,longPeriod,1,-1)#moving average adelantada(como rolling)
+    elif serieType1==5:
+        serie2=movingAverage(serie,longPeriod,1,1) #moving average atrasada 
+    
     
     #La "serie2" suele escogerse como una serie desfasada suavizada de "serie".    
     if serieType2==0:
@@ -139,3 +150,31 @@ def ml_logreg(close,per=0.9,**kwargs):
 	w_pred["w"] = w_pred["w"].shift(1)
 	
 	return w_pred
+
+
+def hf(buy_price, sell_price, current_price, gain_rate = 0.02, lose_rate = 0.01, have_coin=False,sell_fee=0.0025,buy_fee=0.0025):
+	"""dfda
+	afadsfa
+	"""
+	
+	signal = "WAIT"
+	# si queremos vender
+	if have_coin:
+		if current_price*(1-sell_fee) > (buy_price*(1+gain_rate)):
+			signal = "SELL"
+			sell_price = current_price*(1-sell_fee)
+		elif buy_price*(1-lose_rate) > (current_price)*(1-sell_fee):
+			signal = "SELL"
+			sell_price = current_price*(1-sell_fee)
+		else:
+			signal = "WAIT"
+	
+	else:
+		print "En hf: ",sell_price*(1-lose_rate), current_price
+		if (sell_price*(1-lose_rate)) > current_price*(1-buy_fee):
+			 signal = "BUY"
+			 buy_price = current_price*(1-buy_fee)
+		else:
+			signal = "WAIT"
+
+	return signal, buy_price, sell_price

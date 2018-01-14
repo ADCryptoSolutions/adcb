@@ -1,4 +1,4 @@
-Orden %s puesta a las %s del %s.
+Orden %s puesta a las %s del %s, con la estrategia %s
 
   Par: %s
   precio: %s

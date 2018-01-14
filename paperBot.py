@@ -109,20 +109,23 @@ def paper(pair, period, strategy):
                 print "\tSeleccionó seguir"
                 pass
 
+
 # imprime en pantalla deacuerdo a la señal dada
-def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,strategy):
+def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,strategy = "hf"):
+	
+    fee = 0.0025
     balance = btc_balance + coin_balance*close
     if signal == "WAIT":
         print time, pair, close, signal," ->balance:",round(balance,5),"BTC"
     
     elif signal == "SELL":
         if have_coin:
-            btc_balance = coin_balance*close
+            btc_balance = (coin_balance*close)*(1-fee)
             coin_balance = 0.0
             balance = btc_balance
             print "\n\tEstrategia: ",strategy,"\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN",coin_balance,"BTC",btc_balance
-            correo(signal, time, pair, close, coin_balance, btc_balance, balance)
+            correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy)
             have_coin = False
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
@@ -132,12 +135,12 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,s
     
     elif signal == "BUY":
         if not have_coin:
-            coin_balance = btc_balance/close
+            coin_balance = (btc_balance/close)*(1-fee)
             btc_balance = 0.0
             balance = coin_balance*close
             print "\n\tEstrategia: ",strategy,"\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN:",coin_balance,"BTC:",btc_balance
-            correo(signal, time, pair, close, coin_balance, btc_balance, balance)
+            correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy)
             have_coin = True
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)

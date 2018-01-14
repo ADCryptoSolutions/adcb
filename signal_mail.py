@@ -14,7 +14,7 @@ from email.mime.text import MIMEText
 from os import system
 
 
-def correo(order, date, pair, close, coin_balance, btc_balance, balance):
+def correo(order, date, pair, close, coin_balance, btc_balance, balance, strategy):
 
     hour = date.split(" ")[1]
     day = date.split(" ")[0]
@@ -28,8 +28,8 @@ def correo(order, date, pair, close, coin_balance, btc_balance, balance):
     passw = datosr[1].strip(" ").strip("\n")
     
     destinatario = "emetdan@gmail.com, sbuelvasch@gmail.com, eegutierrezb@gmail.com"
-    asunto = "Orden %s puesta en %s"%(order, pair) 
-    mensaje1=open('mail_message.txt').read()%(order, hour, day, pair, close, pair.split("_")[1], coin_balance, pair.split("_")[0], btc_balance, balance, pair.split("_")[0])
+    asunto = "%s_Bot. Orden %s puesta en %s"%(strategy, order, pair) 
+    mensaje1=open('mail_message.txt').read()%(order, hour, day, strategy, pair, close, pair.split("_")[1], coin_balance, pair.split("_")[0], btc_balance, balance, pair.split("_")[0])
     
     #Prepara asunto y remitentes
     msg = MIMEMultipart()

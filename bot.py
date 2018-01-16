@@ -268,9 +268,9 @@ def print_full(x):
     print(x)
     pd.reset_option('display.max_rows')
 
-# genera el tiempo inicial que se requiere para las estrategias de ML
+
 def ml_init_time(end,start,per):
-    """
+    """genera el tiempo inicial que se requiere para las estrategias de ML
     ts1,ts2 = string, fechas en linux time stamp format
     """
     from datetime import datetime
@@ -279,12 +279,12 @@ def ml_init_time(end,start,per):
     tf = datetime.fromtimestamp(end)
     ti = datetime.fromtimestamp(start)
     
-    print "per: %s, 1-Per: %s, Pocentaje Test-Train %s\n"%(per,1-per,int(1/(1-per)))
+    #print "per: %s, 1-Per: %s, Pocentaje Test-Train %s\n"%(per,1-per,int(1/(1-per)))
     
     # se utiliza round para corregir el problema de precision binaria
     t = tf-(tf-ti)*int(round(1/(1-per)))
     
-    print "Nuevo tiempo inicial %s\n"%t
+    #print "Nuevo tiempo inicial %s\n"%t
     t_tuple = t.timetuple()
     
     return int(time.mktime(t_tuple))

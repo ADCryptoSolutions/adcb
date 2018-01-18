@@ -170,11 +170,13 @@ def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balanc
             print time, pair, close, "WAIT"," ->balance:",round(balance[-1], 6),"BTC"
     
     elif signal == "BUY":
+        # Aplicando peso para discriminar la compra
+        btc_balance = btc_balance*weight
         if not have_coin:
             # colocando orden de compra de todas las monedas que tenemos 
             # para el par deseado, al último precio de cierre.
             try:
-                order = polo.buy(pair, close, (btc_balance*weight)/close)
+                order = polo.buy(pair, close, (btc_balance)/close)
             except:
                 print "Error al comprar"
                 print "have_coin",have_coin,"close",close,"btc_balance",btc_balance

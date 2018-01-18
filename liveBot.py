@@ -144,7 +144,7 @@ def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balanc
     coin_balance = float(polo.returnBalances()[pair.split("_")[1]])
     balance.append(btc_balance + coin_balance*close)
     
-    destinatarios = open("destinatarios.txt")
+    destinatarios = open("destinatarios.txt").read()
     
     
     if coin_balance >= 0.00001: have_coin = True

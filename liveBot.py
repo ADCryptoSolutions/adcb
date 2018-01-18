@@ -19,7 +19,7 @@ def main(argv):
     print pair, period, strategy
     
     print "\n\n\tEjecutando Live Trading\n\n"
-    paper(pair, int(period), strategy)
+    paper(pair, int(period), strategy, weight)
 
 
 def paper(pair, period, strategy, weight): 

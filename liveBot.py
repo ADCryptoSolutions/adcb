@@ -205,7 +205,7 @@ def load_PT_options(argv):
     try:
         opts, args = getopt.getopt(argv,"hp:c:n:s:e:f:s:w:",["period=","currency=","points="])
     except getopt.GetoptError:
-        print '\t Error paperBot.py. The valid option are:\n -p <period length> -c <currency pair> -s <strategy> -h <help>'
+        print '\t Error paperBot.py. The valid option are:\n -p <period length> -c <currency pair> -s <strategy> -w <weight> -h <help>'
         sys.exit(2)
     
     for opt, arg in opts:
@@ -245,7 +245,7 @@ def load_PT_options(argv):
             weight = float(arg)
     if len(opts) == 0:
         print "\n\tYou did not provide options. The default ones will be assumed.\n"
-        print "paperBot.py -p <period length> -c <currency pair> -s <strategy>"
+        print "paperBot.py -p <period length> -c <currency pair> -s <strategy> -w <weight>"
     return currencyPair, period, strategy, weight
 
 def trading_supervisor(polo, balance, order):

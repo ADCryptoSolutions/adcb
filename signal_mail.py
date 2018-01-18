@@ -14,7 +14,7 @@ from email.mime.text import MIMEText
 from os import system
 
 
-def correo(order, date, pair, close, coin_balance, btc_balance, balance, strategy):
+def correo(order, date, pair, close, coin_balance, btc_balance, balance, strategy, destinatario):
 
     hour = date.split(" ")[1]
     day = date.split(" ")[0]
@@ -27,7 +27,7 @@ def correo(order, date, pair, close, coin_balance, btc_balance, balance, strateg
     remitente = datosr[0].strip(" ").strip("\n")
     passw = datosr[1].strip(" ").strip("\n")
     
-    destinatario = "emetdan@gmail.com, sbuelvasch@gmail.com, eegutierrezb@gmail.com"
+    #destinatario = "emetdan@gmail.com, sbuelvasch@gmail.com, eegutierrezb@gmail.com"
     asunto = "%s_Bot. Orden %s puesta en %s"%(strategy, order, pair) 
     mensaje1=open('mail_message.txt').read()%(order, hour, day, strategy, pair, close, pair.split("_")[1], coin_balance, pair.split("_")[0], btc_balance, balance, pair.split("_")[0])
     
@@ -47,7 +47,7 @@ def correo(order, date, pair, close, coin_balance, btc_balance, balance, strateg
     msg.attach(text)    
 
     #inicia servicio de envío de correos
-    server = smtplib.SMTP('smtp.gmail.com:587') 
+    server = smtplib.SMTP('mail1.webnode.com') 
     server.starttls()
     server.login(remitente,passw)
 
@@ -58,6 +58,6 @@ def correo(order, date, pair, close, coin_balance, btc_balance, balance, strateg
 
 if __name__ == "__main__":
 	
-	order, date, pair, close, coin_balance, btc_balance, balance = "BUY", "2017-12-25 23:55:00", "BTC_DGB", str(0.00000500), str(2000), str(0.0), str(0.0002) 
+	order, date, pair, close, coin_balance, btc_balance, balance, strategy, destinatarios = "BUY", "2017-12-25 23:55:00", "BTC_DGB", str(0.00000500), str(2000), str(0.0), str(0.0002), "ml_knn", "angietata28@gmail.com, emetdan@gmail.com, sbuelvasch@gmail.com"
 	
-	correo(order, date, pair, close, coin_balance, btc_balance, balance)
+	correo(order, date, pair, close, coin_balance, btc_balance, balance, strategy, destinatarios)

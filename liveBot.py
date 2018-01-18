@@ -16,7 +16,7 @@ def main(argv):
     pair, period, strategy, weight = load_PT_options(argv)
     
     print "\n\tLas opciones cargadas fueron:\n" 
-    print pair, period, strategy
+    print pair, period, strategy, "Weight: %s"%weight
     
     print "\n\n\tEjecutando Live Trading\n\n"
     paper(pair, int(period), strategy, weight)
@@ -203,7 +203,7 @@ def load_PT_options(argv):
     period, strategy = 300,"EMAvsSMA"
     weight = 1.0
     try:
-        opts, args = getopt.getopt(argv,"hp:c:n:s:e:f:s:",["period=","currency=","points="])
+        opts, args = getopt.getopt(argv,"hp:c:n:s:e:f:s:w:",["period=","currency=","points="])
     except getopt.GetoptError:
         print '\t Error paperBot.py. The valid option are:\n -p <period length> -c <currency pair> -s <strategy> -h <help>'
         sys.exit(2)

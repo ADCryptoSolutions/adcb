@@ -13,7 +13,7 @@ def main(argv):
     """
     
     # cargando opciones del programa
-    pair, period, strategy = load_PT_options(argv)
+    pair, period, strategy, weight = load_PT_options(argv)
     
     print "\n\tLas opciones cargadas fueron:\n" 
     print pair, period, strategy
@@ -22,7 +22,7 @@ def main(argv):
     paper(pair, int(period), strategy)
 
 
-def paper(pair, period, strategy): 
+def paper(pair, period, strategy, weight): 
     """
     Traer los datos en vivo y devuelve SELL, WAIT o BUY,
     según la estrategia que se escoja    
@@ -104,7 +104,7 @@ def paper(pair, period, strategy):
             #corriendo estrategia
             w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
             
-            have_coin,coin_balance,btc_balance, order = run_live_signal(polo, str(df.index[-1]),w["orders"][-1],pair, df["close"][-1], have_coin, strategy, balance)
+            have_coin,coin_balance,btc_balance, order = run_live_signal(polo, str(df.index[-1]),w["orders"][-1],pair, df["close"][-1], have_coin, strategy, balance, weight)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
             # calibrando tiempo de espera de acuerdo a emisión de próximo dato
             tf = datetime.now()
@@ -137,7 +137,7 @@ def paper(pair, period, strategy):
                 pass
 
 # imprime en pantalla deacuerdo a la señal dada
-def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balance):
+def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balance, weight):
     
     fee = 0.0025
     btc_balance = float(polo.returnBalances()[pair.split("_")[0]])
@@ -165,7 +165,7 @@ def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balanc
             balance[-1] = btc_balance
             print "\n\tEstrategia: ",strategy,"\n"
             print time, pair, close, signal," ->balance:",round(balance[-1], 6),"COIN",coin_balance,"BTC",btc_balance
-            correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, destinatarios)
+            correo(signal, time, pair, close, coin_balance, btc_balance, balance[-1], strategy, destinatarios)
         else:
             print time, pair, close, "WAIT"," ->balance:",round(balance[-1], 6),"BTC"
     
@@ -174,7 +174,7 @@ def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balanc
             # colocando orden de compra de todas las monedas que tenemos 
             # para el par deseado, al último precio de cierre.
             try:
-                order = polo.buy(pair, close, btc_balance/close)
+                order = polo.buy(pair, close, (btc_balance*weight)/close)
             except:
                 print "Error al comprar"
                 print "have_coin",have_coin,"close",close,"btc_balance",btc_balance
@@ -183,7 +183,7 @@ def run_live_signal(polo, time, signal, pair, close, have_coin, strategy, balanc
             balance[-1] = coin_balance*close
             print "\n\tEstrategia: ",strategy,"\n"
             print time, pair, close, signal," ->balance:",round(balance[-1], 6),"COIN:",coin_balance,"BTC:",btc_balance
-            correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, destinatarios)
+            correo(signal, time, pair, close, coin_balance, btc_balance, balance[-1], strategy, destinatarios)
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
             #print "No quizo comprar el berraco"
@@ -201,6 +201,7 @@ def load_PT_options(argv):
     '''
     currencyPair, start, end = "BTC_DGB","2017-06-01 00:00:00","2017-06-01 00:00:00"
     period, strategy = 300,"EMAvsSMA"
+    weight = 1.0
     try:
         opts, args = getopt.getopt(argv,"hp:c:n:s:e:f:s:",["period=","currency=","points="])
     except getopt.GetoptError:
@@ -240,10 +241,12 @@ def load_PT_options(argv):
             strategy = dic["strategy"]
         elif opt in ("-s"):
             strategy = arg
+        elif opt in ("-w","--weight"):
+            weight = float(arg)
     if len(opts) == 0:
         print "\n\tYou did not provide options. The default ones will be assumed.\n"
         print "paperBot.py -p <period length> -c <currency pair> -s <strategy>"
-    return currencyPair, period, strategy
+    return currencyPair, period, strategy, weight
 
 def trading_supervisor(polo, balance, order):
     if order != []:

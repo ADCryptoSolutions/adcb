@@ -38,7 +38,7 @@ def paper(pair, period, strategy, weight):
     ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn"]    
     delta = timedelta(seconds = period)    
     # máximo delay aceptado entre el tiempo actual y el del último dato
-    delta2 = timedelta(seconds = 180)
+    delta2 = timedelta(seconds = 200)
     # desfase para en la mayoría de los casos no entrar al while
     delta3 = timedelta(seconds = 90)
     ml_strategy = False
@@ -95,9 +95,9 @@ def paper(pair, period, strategy, weight):
                     df, polo = prepareLiveData(pair=pair, start=start, end=end, period=int(period))
                     tt = df.index[-1]
                     de = tf - tt
-                    sys.stdout.write("\rSincronizando bot (delay máximo aceptado 120s, actual %ss). Esperando cierre de las %s. Último dato de cierre a las %s"%(str((de).seconds), str(tt+delta), str(tt)))
+                    sys.stdout.write("\rSincronizando bot (delay máximo aceptado 200s, actual %ss). Esperando cierre de las %s. Último dato de cierre a las %s"%(str((de).seconds), str(tt+delta), str(tt)))
                     sys.stdout.flush()
-                    sleep(15)
+                    sleep(5)
             
             print "\n"
             

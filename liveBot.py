@@ -237,10 +237,11 @@ def load_PT_options(argv):
             for line in inputFile:
               if line != ['']:
                 k = line.split('=')
-                dic[k[0].strip()] = k[1].strip().strip('\n')
+                dic[k[0].strip(" ")] = k[1].strip(" ").strip('\n')
             currencyPair = dic["currencyPair"]
             period = int(dic["period"])
             strategy = dic["strategy"]
+            weight = dic["weight"]
         elif opt in ("-s"):
             strategy = arg
         elif opt in ("-w","--weight"):
@@ -250,11 +251,13 @@ def load_PT_options(argv):
         print "paperBot.py -p <period length> -c <currency pair> -s <strategy> -w <weight>"
     return currencyPair, period, strategy, weight
 
+
 def trading_supervisor(polo, balance, order):
     if order != []:
         if balance[-1] <= -10:
             print "\t\nCancelando ordenes abiertas y parando el bot debido a bajo rendimiento\n"
             bot_off(polo, order)
+
 
 def bot_off(polo, order):
     if order != []:

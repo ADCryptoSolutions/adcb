@@ -46,7 +46,7 @@ def correo(order, date, pair, close, coin_balance, btc_balance, balance, strateg
     print mensaje1
     msg.attach(text)    
 
-    #inicia servicio de envío de correos
+    # inicia servicio de envío de correos
     server = smtplib.SMTP('mail1.webnode.com') 
     server.starttls()
     server.login(remitente,passw)

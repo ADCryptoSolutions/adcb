@@ -203,7 +203,7 @@ def load_PT_options(argv):
     '''
     currencyPair, start, end = "BTC_DGB","2017-06-01 00:00:00","2017-06-01 00:00:00"
     period, strategy = 300,"EMAvsSMA"
-    weight = 1.0
+    weight = None
     try:
         opts, args = getopt.getopt(argv,"hp:c:n:s:e:f:s:w:",["period=","currency=","points="])
     except getopt.GetoptError:

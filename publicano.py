@@ -56,8 +56,9 @@ class Publicano():
         """Crea archivo fundTracker con su header."""
 
         bots = ""
-        for pair in self.pairs:
-            bots += pair+","
+        for bot in self.bots:
+            bots += bot["pair"]+"_"+bot["strategy"]+bot["period"]+","
+
 
         with open(self.tracker_file, "w") as tracker_file:
             tracker_file.write("Fecha,"+bots.strip(",")+"\n")
@@ -74,7 +75,8 @@ class Publicano():
         :type balances: lista de python. Los fondos en la lista deben
         seguir el orden de self.pairs"""
 
-        # Se agrega linea al final del archivo con el último dato de los balances
+        # Se agrega linea al final del archivo con el último
+        # dato de los balances
         with open(self.tracker_file, "a") as tracker_file:
             tracker_file.write(fecha+","+",".join(balances)+"\n")
 
@@ -84,7 +86,8 @@ class Publicano():
 
         # Se abre el archivo fundTracker.inp como lista
         tracker_file = open(self.tracker_file).readlines()
-        # Lista que contendrá diccionarios por cada fila de datos en fundTracker.inp
+        # Lista que contendrá diccionarios por cada fila de
+        # datos en fundTracker.inp
         tracker_list = []
         # matriz con los datos del archivo
         balances = []
@@ -93,14 +96,14 @@ class Publicano():
         for line in tracker_file:
             balances.append(line.strip("\n").split(","))
 
-        # obteniendo una lista con los pares
-        pairs = balances[0][1:]
+        # obteniendo una lista con el header
+        headers = balances[0][1:]
 
         # recorriendo la matriz para generar la lista con los diccionarios
         for row in range(1, len(balances)):
             # creando diccionario, cuyas llaves son un string con el par
             dic = {}
-            for index, pair in enumerate(pairs):
+            for index, pair in enumerate(headers):
                 dic[pair] = balances[row][index+1]
             # agregando diccionario a la lista
             tracker_list.append(dic)

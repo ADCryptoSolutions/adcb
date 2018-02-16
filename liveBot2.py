@@ -114,9 +114,7 @@ class LiveBot:
             # cierre y la hora actual sea mayor a 120s
             while self.de > self.delta2:
                 self.prepareData()
-                sys.stdout.write("\rSincronizando bot (delay máximo aceptado\
-                                200s, actual %ss). Esperando cierre de las %s.\
-                                Último dato de cierre a las %s"%(str((self.de).seconds),
+                sys.stdout.write("\rSincronizando bot (delay máximo aceptado 200s, actual %ss). Esperando cierre de las %s. Último dato de cierre a las %s"%(str((self.de).seconds),
                                 str(self.tt+self.delta), str(self.tt)))
                 sys.stdout.flush()
                 sleep(5)
@@ -224,8 +222,10 @@ class LiveBot:
                 # los pesos en multiBot.inp
                 self.checker.initFundTracker(time, self.polo)
                 # leyendo como diccionario el primer dato de fundTracker.inp
-                # y de acuerdo esto seleccionando el dinero disponible para comprar
-                base_balance = float(self.checker.fundTrackerReader()[0][self.pair])
+                # y de acuerdo esto seleccionando el dinero
+                # disponible para comprar
+                base_balance = float(self.checker.fundTrackerReader()[0][
+                        self.pair+"_"+self.strategy+str(self.period)])
             else:
                 # leyendo balance de compra del archivo personal
                 base_balance = float(self.read_balance())
@@ -246,7 +246,7 @@ class LiveBot:
         self.order = []
 
         print "W:", w, "have_coin:", self.have_coin
-        # si según la señal no deberíamos poseer el activo
+        # si según el vector de peso no deberíamos poseer el activo
         if not w:
             # pero lo tenemos
             if self.have_coin:
@@ -285,7 +285,7 @@ class LiveBot:
                        base_balance, balance[-1], self.strategy, destinatarios)
             # si lo tenemos
             else:
-                print time, pair, close, "WAIT"," ->balance:",round(balance[-1], 6),base_simbol
+                print time, pair, close,"WAIT"," ->balance:",round(balance[-1], 6),base_simbol
 
         # supervisando que la extrategia no esté perdiendo más del 10%
         print "En trading_supervisor"
@@ -302,14 +302,16 @@ class LiveBot:
         """Escribe en un archivo de texto el último balance de los fondos
         administrados por el bot"""
 
-        with open(self.pair+"_bot.txt", "w") as f:
+        with open(self.pair+"_" +
+                  self.strategy+str(self.period)+"_bot.txt", "w") as f:
             f.write(str(self.balance[-1]))
 
     def read_balance(self):
         """Lee de un archivo de texto el último balance de los fondos
         administrados por el bot"""
 
-        balance = open(self.pair+"_bot.txt").readlines()
+        balance = open(self.pair+"_" +
+                       self.strategy+str(self.period)+"_bot.txt").readlines()
 
         return balance[0]
 

@@ -28,7 +28,7 @@ def EMAvsSMA(serie, smaPeriod=20, emaPeriod=5):
     w['w'] = w['w'].apply(change5)
 
     w["orders"] = orders(w["w"])
-    w['w'] = w['w'].shift(1)
+
     w["price"] = serie
 
     return w
@@ -55,7 +55,7 @@ def EMAvsSMA2(serie, volatility, smaPeriod=20, emaPeriod=5):
     w["w"] = volatility_corection(w["w"], volatility)
 
     w["orders"] = orders(w["w"])
-    w['w'] = w['w'].shift(1)
+
     w["price"] = serie
 
     return w
@@ -75,7 +75,7 @@ def SMAvsSMA(serie, smaPeriod=20, emaPeriod=10):
     w['w'] = w['w'].apply(change5)
 
     w["orders"] = orders(w["w"])
-    w['w'] = w['w'].shift(1)
+
     w["price"] = serie
     
     return w
@@ -98,7 +98,7 @@ def SMAvsSMA2(serie,  volatility, smaPeriod=20, emaPeriod=10):
     w["w"] = volatility_corection(w["w"], volatility)
 
     w["orders"] = orders(w["w"])
-    w['w'] = w['w'].shift(1)
+    
     w["price"] = serie
 
     return w
@@ -120,7 +120,7 @@ def EMAvsEMA(serie, smaPeriod=20, emaPeriod=5):
     w['w'] = w['w'].apply(change5)
 
     w["orders"] = orders(w["w"])
-    w['w'] = w['w'].shift(1)
+    
     w["price"] = serie
 
     return w
@@ -144,7 +144,7 @@ def pricevsEMA(serie, emaPeriod=5):
     w['w'] = w['w'].apply(change5)
 
     w["orders"] = orders(w["w"])
-    w['w'] = w['w'].shift(1)
+    
     w["price"] = serie
 
     return w
@@ -168,7 +168,7 @@ def pricevsSMA(serie, smaPeriod=20):
     w['w'] = w['w'].apply(change5)
 
     w["orders"] = orders(w["w"])
-    w['w'] = w['w'].shift(1)
+    
     w["price"] = serie
 
     return w
@@ -188,7 +188,7 @@ def ml_logreg(close, per=0.9, **kwargs):
 
     w["orders"] = orders(w["w"])
     # vector de pesos de la estrategia ideal
-    w['w'] = w['w'].shift(1)
+    
 
     # diccionario que contendra las caracteristicas para evaluar y
     # el precio o weightedAverage sobre el que se quiere predecir
@@ -245,7 +245,7 @@ def ml_randfor(close, per=0.9, **kwargs):
 
     w["orders"] = orders(w["w"])
     # vector de pesos de la estrategia ideal
-    w['w'] = w['w'].shift(1)
+    
 
     # diccionario que contendra las caracteristicas para evaluar y
     # el precio o weightedAverage sobre el que se quiere predecir
@@ -301,7 +301,7 @@ def ml_knn(close, per=0.9, **kwargs):
 
     w["orders"] = orders(w["w"])
     # vector de pesos de la estrategia ideal
-    w['w'] = w['w'].shift(1)
+    
 
     # diccionario que contendra las caracteristicas para evaluar y
     # el precio o weightedAverage sobre el que se quiere predecir

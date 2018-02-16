@@ -5,11 +5,12 @@
 import numpy as np
 
 def profit(w):
-  
+
+  w['w'] = w['w'].shift(1)
   logReturn = np.log(w["price"]).diff().fillna(0)
   vecLogReturn = (logReturn*w["w"]).cumsum()
   vecReturn = np.exp(vecLogReturn)-1
-  relativeReturn = np.exp(np.dot(w["w"],logReturn)) - 1
+  #relativeReturn = np.exp(np.dot(w["w"],logReturn)) - 1
   w["return"] = vecReturn
   return vecReturn[-1], vecReturn
 

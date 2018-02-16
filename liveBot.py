@@ -203,16 +203,16 @@ def load_PT_options(argv):
     '''
     currencyPair, start, end = "BTC_DGB","2017-06-01 00:00:00","2017-06-01 00:00:00"
     period, strategy = 300,"EMAvsSMA"
-    weight = None
+    multi = None
     try:
-        opts, args = getopt.getopt(argv,"hp:c:n:s:e:f:s:w:",["period=","currency=","points="])
+        opts, args = getopt.getopt(argv,"hp:c:n:s:e:f:s:m:",["period=","currency=","points="])
     except getopt.GetoptError:
-        print '\t Error paperBot.py. The valid option are:\n -p <period length> -c <currency pair> -s <strategy> -w <weight> -h <help>'
+        print '\t Error liveBot.py. The valid option are:\n -p <period length> -c <currency pair> -s <strategy> -m <int> -h <help>'
         sys.exit(2)
     
     for opt, arg in opts:
         if opt == '-h':
-            print 'liveBot.py -p <period length> -c <currency pair> -s <strategy>'
+            print 'liveBot.py -p <period length> -c <currency pair> -s <strategy> -m <int>'
             sys.exit()
         elif opt in ("-p", "--period"):
             if (int(arg) in [300,900,1800,7200,14400,86400]):
@@ -241,15 +241,32 @@ def load_PT_options(argv):
             currencyPair = dic["currencyPair"]
             period = int(dic["period"])
             strategy = dic["strategy"]
-            weight = dic["weight"]
+            multi = dic["multi"]
         elif opt in ("-s"):
             strategy = arg
-        elif opt in ("-w","--weight"):
-            weight = float(arg)
+        elif opt in ("-m","--multi"):
+            multi = int(arg)
+            bots = []
+            # abriendo archivo como lista
+            multi_file = open("multi_bot.inp").readlines()
+
+            for line in multi_file:
+                if line.strip("\n").strip(" ") != "":
+                    pair = line.split(",")[0].strip(" ")
+                    weight = line.split(",")[1].strip(" ")
+                    strategy = line.split(",")[2].strip(" ")
+                    period = line.split(",")[3].strip("\n").strip(" ")
+                    bots.append({"pair":pair, "weight":weight,
+                                 "strategy":strategy, "period":period})
+
+            currencyPair = bots[multi]["pair"]
+            period = int(bots[multi]["period"])
+            strategy = bots[multi]["strategy"]
+
     if len(opts) == 0:
         print "\n\tYou did not provide options. The default ones will be assumed.\n"
         print "paperBot.py -p <period length> -c <currency pair> -s <strategy> -w <weight>"
-    return currencyPair, period, strategy, weight
+    return currencyPair, period, strategy, multi
 
 
 def trading_supervisor(polo, balance, order):

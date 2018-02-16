@@ -1,3 +1,2 @@
-BTC_DGB, 0.4, ml_knn, 300
-BTC_BCH, 0.4, ml_logreg, 300
-BTC_ETH, 0.2, ml_knn, 300
+BTC_ETC, 0.7, ml_knn, 14400
+BTC_ETC, 0.3, ml_logreg, 14400

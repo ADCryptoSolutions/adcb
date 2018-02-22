@@ -4,7 +4,7 @@ import pandas as pd
 from peakdetect import peakdetect
 import pylab as plt
 
-def ml_data(w,pl=True):
+def ml_data(w,pl=True, la=3):
 	
 	# separando fechas de precios
 	y = w.values
@@ -12,7 +12,7 @@ def ml_data(w,pl=True):
 	
 	# encontrando maximos y minimos locales.
 	# peakdetect devuelve una lista con numpy arrays 1x2
-	_max, _min = peakdetect(y, x, 3)
+	_max, _min = peakdetect(y, x, la)
 	
 	# separando en fechas y precios 
 	xm = [p[0] for p in _max]

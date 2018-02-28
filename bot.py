@@ -19,7 +19,7 @@ def main(argv):
     df = 0
     
     # lista de estrategias de machine learning
-    ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn"]
+    ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn", "ml_mlpc", "ml_bm"]
     # variable que se usa en run_strategy
     ml_strategy = False
     
@@ -174,7 +174,7 @@ def marketReturn(serie):
 def run_strategy(strategy,df,pair,ml_strategy,per):
     from strategy2 import pricevsEMA, pricevsSMA, EMAvsEMA, EMAvsSMA
     from strategy2 import SMAvsSMA, EMAvsSMA2, SMAvsSMA2
-    from strategy2 import ml_randfor, ml_logreg, ml_knn
+    from strategy2 import ml_randfor, ml_logreg, ml_knn, ml_mlpc, ml_bm
     from strategy import crossingStrategy, crossingStrategy2
     fun_dic = {
       "pricevsEMA": pricevsEMA,
@@ -187,6 +187,8 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
       "ml_logreg": ml_logreg,
       "ml_randfor": ml_randfor,
       "ml_knn": ml_knn,
+      "ml_mlpc": ml_mlpc,
+      "ml_bm": ml_bm,
       "crossing":crossingStrategy,
       "crossing2":crossingStrategy2
       }

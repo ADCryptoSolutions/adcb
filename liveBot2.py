@@ -46,7 +46,7 @@ class LiveBot:
         # en esta lista deben guardarse los nombres de todas las estrategias
         # de machine learning en strategy, para discriminar en base a estas
         # la cantindad de datos a traer
-        self.ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn"]
+        self.ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn", "ml_mlpc", "ml_bm"]
         self.ml_strategy = False
         self.have_coin = False
         self.delta = timedelta(seconds=int(self.period))

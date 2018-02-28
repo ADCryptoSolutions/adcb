@@ -35,7 +35,7 @@ def paper(pair, period, strategy, weight):
     # en esta lista deben guardarse los nombres de todas las estrategias
     # de machine learning en strategy, para discriminar en base a estas
     # la cantindad de datos a traer
-    ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn"]    
+    ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn", "ml_mlpc", "ml_bm"]
     delta = timedelta(seconds = period)    
     # máximo delay aceptado entre el tiempo actual y el del último dato
     delta2 = timedelta(seconds = 200)

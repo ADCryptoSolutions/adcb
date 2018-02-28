@@ -9,6 +9,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
+from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import BernoulliRBM
+from sklearn.pipeline import Pipeline
 import sys
 # dada una serie de pandas o una lista y el numero de muestras para la EMA y
 # SMA devuelve vector w considerando el cruce entre EMA y SMA
@@ -226,7 +229,6 @@ def ml_logreg(close, per=0.9, **kwargs):
     # dataframe con vector de pesos de estrategia de regresio logistica
     w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
     w_pred["orders"] = orders(w_pred["w"])
-    w_pred["w"] = w_pred["w"].shift(1)
 
     return w_pred
 
@@ -282,7 +284,6 @@ def ml_randfor(close, per=0.9, **kwargs):
     # dataframe con vector de pesos de estrategia de regresio logistica
     w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
     w_pred["orders"] = orders(w_pred["w"])
-    w_pred["w"] = w_pred["w"].shift(1)
 
     return w_pred
 
@@ -338,6 +339,116 @@ def ml_knn(close, per=0.9, **kwargs):
     # dataframe con vector de pesos de estrategia de regresio logistica
     w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
     w_pred["orders"] = orders(w_pred["w"])
-    w_pred["w"] = w_pred["w"].shift(1)
+
+    return w_pred
+
+
+def ml_mlpc(close, per=0.9, **kwargs):
+    """implements a multi-layer perceptron (MLP) algorithm
+    close: Serie de Pandas con precio de cierre. Se utiliza para crear
+    estrategia ideal.
+    per: Float que especifica en que porcentaje se dividiran train y test.
+    **kwargs: Diccionario con las caracteristicas para entrenar y predecir.
+    """
+
+    # dataframe con pesos de la estrategia ideal
+    w = pd.DataFrame(data={"w": ml_data(close, pl=False).values,
+                           "price": close})
+
+    w["orders"] = orders(w["w"])
+    # vector de pesos de la estrategia ideal
+    
+
+    # diccionario que contendra las caracteristicas para evaluar y
+    # el precio o weightedAverage sobre el que se quiere predecir
+    dic = {"best_w": w["w"], "close": close}
+    # agregando el resto de las caracteristicas
+    dic.update(kwargs)
+
+    # creando dataframe con los valores del diccionario
+    data = pd.DataFrame(data=dic)
+
+    # quitando valores NaN
+    data.replace([np.inf, -np.inf], np.nan, inplace=True)
+    data.fillna(method='bfill', inplace=True)
+
+    # separando datos para crear y evaluar el modelo de machine learning.
+    # se toma train desde 1 para no tener NaN de la primera fila
+    train = data[1:int(len(data)*per)]
+    test = data[int(len(data)*per):]
+
+    # iniciando modelo de red neuronal
+    mlpc = MLPClassifier(hidden_layer_sizes = (100,))
+    try:
+        # entrenando el modelo
+        mlpc.fit(train.drop(["best_w", "close"], axis=1), train["best_w"])
+    except ValueError:
+        print data.isnull().any()
+        print train[train['rsi'].isnull()]
+        print train[train['rsi'] == np.inf]
+        sys.exit(1)
+
+    # prediciendo con el modelo
+    pred = mlpc.predict(test.drop(["best_w", "close"], axis=1))
+
+    # dataframe con vector de pesos de estrategia de regresio logistica
+    w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
+    w_pred["orders"] = orders(w_pred["w"])
+
+    return w_pred
+
+
+def ml_bm(close, per=0.9, **kwargs):
+    """implements a multi-layer perceptron (MLP) algorithm
+    close: Serie de Pandas con precio de cierre. Se utiliza para crear
+    estrategia ideal.
+    per: Float que especifica en que porcentaje se dividiran train y test.
+    **kwargs: Diccionario con las caracteristicas para entrenar y predecir.
+    """
+
+    # dataframe con pesos de la estrategia ideal
+    w = pd.DataFrame(data={"w": ml_data(close, pl=False).values,
+                           "price": close})
+
+    w["orders"] = orders(w["w"])
+    # vector de pesos de la estrategia ideal
+
+    # diccionario que contendra las caracteristicas para evaluar y
+    # el precio o weightedAverage sobre el que se quiere predecir
+    dic = {"best_w": w["w"], "close": close}
+    # agregando el resto de las caracteristicas
+    dic.update(kwargs)
+
+    # creando dataframe con los valores del diccionario
+    data = pd.DataFrame(data=dic)
+
+    # quitando valores NaN
+    data.replace([np.inf, -np.inf], np.nan, inplace=True)
+    data.fillna(method='bfill', inplace=True)
+
+    # separando datos para crear y evaluar el modelo de machine learning.
+    # se toma train desde 1 para no tener NaN de la primera fila
+    train = data[1:int(len(data)*per)]
+    test = data[int(len(data)*per):]
+
+    # iniciando modelo de boltzman machine
+    rbm = BernoulliRBM()
+    logistic = LogisticRegression()
+    classifier = Pipeline([("rbm", rbm), ("logistic", logistic)])
+    try:
+        # entrenando el modelo
+        classifier.fit(train.drop(["best_w", "close"], axis=1), train["best_w"])
+    except ValueError:
+        print data.isnull().any()
+        print train[train['rsi'].isnull()]
+        print train[train['rsi'] == np.inf]
+        sys.exit(1)
+
+    # prediciendo con el modelo
+    pred = classifier.predict(test.drop(["best_w", "close"], axis=1))
+
+    # dataframe con vector de pesos de estrategia de regresio logistica
+    w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
+    w_pred["orders"] = orders(w_pred["w"])
 
     return w_pred

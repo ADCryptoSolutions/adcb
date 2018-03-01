@@ -378,7 +378,7 @@ def ml_mlpc(close, per=0.9, **kwargs):
     test = data[int(len(data)*per):]
 
     # iniciando modelo de red neuronal
-    mlpc = MLPClassifier(hidden_layer_sizes = (100,))
+    mlpc = MLPClassifier(solver='lbfgs',random_state=0, hidden_layer_sizes=(50, 20))
     try:
         # entrenando el modelo
         mlpc.fit(train.drop(["best_w", "close"], axis=1), train["best_w"])

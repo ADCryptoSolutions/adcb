@@ -252,14 +252,14 @@ class LiveBot:
             if self.have_coin:
                 # colocando orden de venta de todas las monedas que tenemos
                 # para el par deseado, al último precio de cierre.
-                self.order = polo.sell(pair, close, coin_balance)
+                #self.order = polo.sell(pair, close, coin_balance)
                 base_balance = coin_balance*close*(1-fee)
                 coin_balance = 0.0
                 balance[-1] = base_balance
                 print "\n\tEstrategia: ", self.strategy, "\n"
                 print time, pair, close, signal," ->balance:",round(balance[-1], 6),"COIN",coin_balance,base_simbol+":",base_balance
-                correo(signal, time, pair, close, coin_balance,
-                       base_balance, balance[-1], self.strategy, destinatarios)
+                #correo(signal, time, pair, close, coin_balance,
+                #       base_balance, balance[-1], self.strategy, destinatarios)
             # si no lo tenemos
             else:
                 print time, pair, close, "WAIT"," ->balance:", round(balance[-1], 6), base_simbol
@@ -272,7 +272,7 @@ class LiveBot:
                 # para el par deseado, al último precio de cierre.
                 try:
                     print "En try"
-                    self.order = polo.buy(pair, close, (base_balance)/close)
+                    #self.order = polo.buy(pair, close, (base_balance)/close)
                 except:
                     print "Error al comprar"
                     print "have_coin",self.have_coin,"close",close,"base_balance",base_balance
@@ -281,8 +281,8 @@ class LiveBot:
                 balance[-1] = coin_balance*close
                 print "\n\tEstrategia: ", self.strategy, "\n"
                 print time, pair, close, signal," ->balance:",round(balance[-1], 6),"COIN:",coin_balance,base_simbol+":",base_balance
-                correo(signal, time, pair, close, coin_balance,
-                       base_balance, balance[-1], self.strategy, destinatarios)
+                #correo(signal, time, pair, close, coin_balance,
+                #       base_balance, balance[-1], self.strategy, destinatarios)
             # si lo tenemos
             else:
                 print time, pair, close,"WAIT"," ->balance:",round(balance[-1], 6),base_simbol
@@ -291,17 +291,18 @@ class LiveBot:
         print "En trading_supervisor"
         trading_supervisor(polo, balance, self.order)
 
+        # actualizando el balance del bot
+        self.balance = balance
+
         # escribiendo en archivo de texto el último balance
         print "Escribiendo balance administrado en archivo de texto"
         self.write_balance()
-
-        # actualizando el balance del bot
-        self.balance = balance
 
     def write_balance(self):
         """Escribe en un archivo de texto el último balance de los fondos
         administrados por el bot"""
 
+        print "balance: ", self.balance
         with open(self.pair+"_" +
                   self.strategy+str(self.period)+"_bot.txt", "w") as f:
             f.write(str(self.balance[-1]))

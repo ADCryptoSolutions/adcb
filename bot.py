@@ -215,7 +215,7 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
         #print df_rsi.isnull().any()
         #print df_rsi[df_rsi['RS1'].isnull()]
         
-        # Creando vector de pesos utilizando estrategia de ML 
+        # Creando vector de pesos utilizando estrategia de ML
         w = fun_dic[strategy](df["close"], per=per, **feature_dic)        
     else:
         # creando vector de pesos correspondiente 

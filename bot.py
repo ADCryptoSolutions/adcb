@@ -139,18 +139,25 @@ def prepareData(pair="DGB_BTC", start=string2ts("2017-06-01 00:00:00"),
     return df
 
 
-def makeVolatility(df, c=2.0):
+def makeVolatility(df, c=2.0, type=0):
     """
     Calcula la volatilidad en función  del tamaño de las velas
     """
-
-    # distancia entre el precio más alto y el más bajo
-    highLow = abs(df["high"]-df["low"])
-    # distancia entre el precio de apertura y el de cierre
-    openClose = abs(df["open"]-df["close"])
-
-    volatile = highLow <= c*openClose
-    
+    volatile = 0
+    if type ==0:
+        # distancia entre el precio más alto y el más bajo
+        highLow = abs(df["high"]-df["low"])
+        # distancia entre el precio de apertura y el de cierre
+        openClose = abs(df["open"]-df["close"])
+        
+        volatile = highLow <= c*openClose
+    if type ==1:
+        from stockstats import StockDataFrame
+        
+        # Creando indicadores para estrategia, via stockstats
+        stock = StockDataFrame.retype(df.copy())
+        volatile = stock["pdi"]>c
+        
     return volatile
 
 

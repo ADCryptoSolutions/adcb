@@ -153,7 +153,7 @@ def pricevsEMA(serie, emaPeriod=5):
     return w
 
 
-def pricevsEMA2(serie, volatility, emaPeriod=5):
+def pricevsEMA2(serie, volatility, emaPeriod=5, type=0):
     """
     dada una serie de pandas y el numero de muestras para la EMA devuelve el
     vector w considerando el cruce entre EMA y el precio
@@ -171,7 +171,7 @@ def pricevsEMA2(serie, volatility, emaPeriod=5):
     w['w'] = w['w'].apply(change5)
 
     # corrigiendo por volatilidad
-    w["w"] = volatility_corection(w["w"], volatility)
+    w["w"] = volatility_corection(w["w"], volatility, type)
 
     w["orders"] = orders(w["w"])
 

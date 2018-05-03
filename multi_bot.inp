@@ -1,2 +1,2 @@
-BTC_ETC, 0.7, ml_knn, 300
+BTC_ETC, 0.7, pricevsEMA, 300
 BTC_ETC, 0.3, ml_logreg, 300

@@ -21,7 +21,7 @@ def orders(w):
     return w2
 
 
-def volatility_corection(w, volatility):
+def volatility_corection(w, volatility, type=0):
     """
     Corrige un vector de pesos derivado de una estrategia de cruce de medias
     vteniendo en cuenta la volatilidad de la vela en los cruces.
@@ -31,20 +31,22 @@ def volatility_corection(w, volatility):
     es volatil o no
     """
 
-    #w2 = pd.Series(index=w.index, dtype=object)
-    w2 = w.copy()
+    w2 = None
 
-    volatile = False
+    if type == 0:
+        w2 = w.copy()
 
-    # recoriendo la serie
-    for i in range(len(w)-1):
-        # si quiere comprar o vender
-        if w[i+1] != w[i]:
-            # miro la volatilidad en el cruce
-            volatile = volatility[i+1]
+        volatile = False
+        # recoriendo la serie
+        for i in range(len(w)-1):
+            # si quiere comprar o vender
+            if w[i+1] != w[i]:
+                # miro la volatilidad en el cruce
+                volatile = volatility[i+1]
 
-            # si es volatil en el cruce -> no opere
-            if volatile:
-                w2[i+1] = w[i]
-    
+                # si es volatil en el cruce -> no opere
+                if volatile:
+                    w2[i+1] = w[i]
+    if type == 1:
+        w2 = w*volatility
     return w2

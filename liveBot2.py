@@ -265,7 +265,7 @@ class LiveBot:
                 print time, pair, close, "WAIT"," ->balance:", round(balance[-1], 6), base_simbol
 
         # si según la señal deberíamos poseer el activo
-        elif w:
+        if w:
             # y no lo tenemos
             if not self.have_coin:
                 # colocando orden de compra de todas las monedas que tenemos

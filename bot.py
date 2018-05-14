@@ -182,6 +182,7 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
     from strategy2 import pricevsEMA, pricevsSMA, EMAvsEMA, EMAvsSMA
     from strategy2 import SMAvsSMA, EMAvsSMA2, SMAvsSMA2
     from strategy2 import ml_randfor, ml_logreg, ml_knn, ml_mlpc, ml_bm
+    from strategy2 import ml_xgb, ml_stacking
     from strategy import crossingStrategy, crossingStrategy2
     fun_dic = {
       "pricevsEMA": pricevsEMA,
@@ -196,6 +197,8 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
       "ml_knn": ml_knn,
       "ml_mlpc": ml_mlpc,
       "ml_bm": ml_bm,
+      "ml_xgb": ml_xgb,
+      "ml_stacking": ml_stacking,
       "crossing":crossingStrategy,
       "crossing2":crossingStrategy2
       }
@@ -217,7 +220,9 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
         RSI1, RSI2 = rsi(df["close"])
         
         # Caracteristicas sobre las que se entrenara el modelo
-        feature_dic = {"rsi":RSI1,"cci":stock["cci"],"price":df["close"]}
+        feature_dic = {"log_return":marketReturn(df["close"]), "rsi":stock["rsi_14"], "macd":stock["macd"],"macds":stock["macds"],"cci":stock["cci"],
+                          "wr":stock["wr_14"], "trix":stock["trix"],
+                          "vr":stock["vr"]}
         
         #print df_rsi.isnull().any()
         #print df_rsi[df_rsi['RS1'].isnull()]

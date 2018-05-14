@@ -53,7 +53,7 @@ def paper(pair, period, strategy, weight):
     if strategy in ml_strategies:
         # para estrategias de machine learning se tomarán los últimos
         # 7000 datos
-        len_data = 7000
+        len_data = 5000
         ml_strategy = True
     else: 
         # para estrategias diferentes a las de ML se toman los últimos

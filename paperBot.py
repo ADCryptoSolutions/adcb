@@ -35,7 +35,10 @@ def paper(pair, period, strategy):
     # en esta lista deben guardarse los nombres de todas las estrategias
     # de machine learning en strategy, para discriminar en base a estas
     # la cantindad de datos a traer
-    ml_strategies = ["ml_logreg", "ml_randfor", "ml_knn"]    
+    ml_strategies = ["ml_logreg", "ml_randfor",
+      "ml_knn", "ml_mlpc",
+      "ml_bm", "ml_xgb",
+      "ml_stacking", "ml_period"]    
     delta = timedelta(seconds = period)
     
     # desfase para en la mayoría de los casos no entrar al while

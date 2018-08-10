@@ -13,6 +13,7 @@ from sklearn.neural_network import BernoulliRBM
 from sklearn.pipeline import Pipeline
 from xgboost import XGBClassifier
 from vecstack import stacking
+from sklearn.metrics import accuracy_score
 import sys
 # dada una serie de pandas o una lista y el numero de muestras para la EMA y
 # SMA devuelve vector w considerando el cruce entre EMA y SMA
@@ -313,6 +314,8 @@ def ml_randfor(close, per=0.9, **kwargs):
     w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
     w_pred["orders"] = orders(w_pred["w"])
 
+    print "Accuracy:%s"%accuracy_score(test["best_w"], pred)
+
     return w_pred
 
 
@@ -367,6 +370,8 @@ def ml_knn(close, per=0.9, **kwargs):
     # dataframe con vector de pesos de estrategia de regresio logistica
     w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
     w_pred["orders"] = orders(w_pred["w"])
+
+    print "Accuracy:%s"%accuracy_score(test["best_w"], pred)
 
     return w_pred
 
@@ -534,6 +539,8 @@ def ml_xgb(close, per=0.9, **kwargs):
     w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
     w_pred["orders"] = orders(w_pred["w"])
 
+    print "Accuracy:%s"%accuracy_score(test["best_w"], pred)
+    
     return w_pred
 
 
@@ -614,5 +621,61 @@ def ml_stacking(close, per=0.9, **kwargs):
     # dataframe con vector de pesos de estrategia de regresio logistica
     w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
     w_pred["orders"] = orders(w_pred["w"])
+
+    return w_pred
+
+
+def ml_period(close, outcome, per=0.9, **kwargs):
+    """
+    close: Serie de Pandas con precio de cierre. Se utiliza para crear
+    estrategia ideal.
+    per: Float que especifica en que porcentaje se dividiran train y test.
+    **kwargs: Diccionario con las caracteristicas para entrenar y predecir.
+    """
+
+    # dataframe con pesos de la estrategia ideal
+    w = pd.DataFrame(data={"w": outcome,
+                           "price": close})
+
+    w["orders"] = orders(w["w"])
+    # vector de pesos de la estrategia ideal
+
+    # diccionario que contendra las caracteristicas para evaluar y
+    # el precio o weightedAverage sobre el que se quiere predecir
+    dic = {"best_w": w["w"], "close": close}
+    # agregando el resto de las caracteristicas
+    dic.update(kwargs)
+
+    # creando dataframe con los valores del diccionario
+    data = pd.DataFrame(data=dic)
+
+    # quitando valores NaN
+    data.replace([np.inf, -np.inf], np.nan, inplace=True)
+    data.fillna(method='bfill', inplace=True)
+
+    # separando datos para crear y evaluar el modelo de machine learning.
+    # se toma train desde 1 para no tener NaN de la primera fila
+    train = data[1:int(len(data)*per)]
+    test = data[int(len(data)*per):]
+
+    # iniciando modelo XGBoost
+    knn = XGBClassifier(n_estimators=9, learning_rate=0.75, gamma=12)
+    try:
+        # entrenando el modelo
+        knn.fit(train.drop(["best_w", "close"], axis=1), train["best_w"])
+    except ValueError:
+        print data.isnull().any()
+        print train[train['rsi'].isnull()]
+        print train[train['rsi'] == np.inf]
+        sys.exit(1)
+
+    # prediciendo con el modelo
+    pred = knn.predict(test.drop(["best_w", "close"], axis=1))
+
+    # dataframe con vector de pesos de estrategia de regresio logistica
+    w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
+    w_pred["orders"] = orders(w_pred["w"])
+
+    print "Accuracy:%s"%accuracy_score(test["best_w"], pred)
 
     return w_pred

@@ -3,13 +3,15 @@
 # Funcion que calcula el profit de una determinada
 # estrategia dados w y la serie correspondiente al precio
 import numpy as np
+import pandas as pd
 
 def profit(w):
 
+  print w.head(2)
   w['w'] = w['w'].shift(1)
   logReturn = np.log(w["price"]).diff().fillna(0)
   vecLogReturn = (logReturn*w["w"]).cumsum()
-  vecReturn = np.exp(vecLogReturn)-1
+  vecReturn = np.exp(vecLogReturn.apply(pd.to_numeric))-1
   #relativeReturn = np.exp(np.dot(w["w"],logReturn)) - 1
   w["return"] = vecReturn
   return vecReturn[-1], vecReturn

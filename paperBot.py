@@ -51,6 +51,9 @@ def paper(pair, period, strategy):
     # dinero inicial con el que empieza el paperBot
     btc_balance = 100.0
     coin_balance = 0.0
+    count = 0
+    model = None
+    test = None
     # definiendo el tiempo inicial de la consulta 
     if strategy in ml_strategies:
         # para estrategias de machine learning se tomarán los últimos
@@ -63,7 +66,8 @@ def paper(pair, period, strategy):
         len_data = 40
 
     while True:
-        try:        
+        try:
+            count += 1
             # definiendo end como la hora local actual
             tf = datetime.now()
             # convirtiendola a formato unix time (es equivalente a UTC)
@@ -79,7 +83,15 @@ def paper(pair, period, strategy):
             #print "El total de datos descargados es: ",len(df)
             # corriendo estrategia. Generando vector w
             
-            w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
+            # Si en esta estrategia el modelo se entrena una sola vez
+            if strategy == "ml_period2":
+                if count == 1:
+                    # Entrenando modelo y trayendo datos de testeo
+                    model, test = run_strategy(strategy,df,pair,ml_strategy,per, "train")
+                else:
+                    w, market_return = run_strategy(model, test)
+            else:    
+                w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
             
             have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),w["orders"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance, strategy)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])

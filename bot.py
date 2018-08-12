@@ -178,12 +178,12 @@ def marketReturn(serie):
     print conn.returnBalances()['BTC']
     """
 
-def run_strategy(strategy,df,pair,ml_strategy,per):
+def run_strategy(strategy,df,pair,ml_strategy,per, typ=None):
     from strategy2 import pricevsEMA, pricevsSMA, EMAvsEMA, EMAvsSMA
     from strategy2 import SMAvsSMA, EMAvsSMA2, SMAvsSMA2
     from strategy2 import ml_randfor, ml_logreg, ml_knn, ml_mlpc, ml_bm
     from strategy2 import ml_xgb, ml_stacking, ml_period
-    from strategy import crossingStrategy, crossingStrategy2
+    from strategy import crossingStrategy, crossingStrategy2, train_ml_period
     fun_dic = {
       "pricevsEMA": pricevsEMA,
       "pricevsSMA": pricevsSMA,
@@ -208,7 +208,8 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
     
     w=0
     feature_dic = {}
-
+    # calculando el retorno del mercado en el tiempo seleccionado
+    df["cum_r"] = marketReturn(w["price"])
     
     if ml_strategy:
         from stockstats import StockDataFrame
@@ -219,7 +220,7 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
         
         # el diccionario de caracterísitcas para ml_period solo cuenta con
         # 2 elementos
-        if strategy == "ml_period":
+        if strategy[:-1] == "ml_period":
             
             ts_1 = df.shift(1)
             ts_2 = df.shift(2)
@@ -231,10 +232,19 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
             outcome = (tf_1["close"]>tf_1["open"])
             
             feature_dic = {"feat1": df["feat1"], "feat2":df["feat2"], 
-                           "rsi":stock["rsi_14"].shift(-1), "cci":stock["cci"].shift(-1)}
+                           "rsi":stock["rsi_14"].shift(-1), 
+                           "cci":stock["cci"].shift(-1)}
+            
+            if strategy == "ml_period2" and typ != None:
+                    
+                    model, test = train_ml_period(df["close"], outcome,
+                           per=per, **feature_dic)
+                    return model, test
+
 
             # Creando vector de pesos utilizando estrategia de ML
-            w = fun_dic[strategy](df["close"], outcome, per=per, **feature_dic)
+            w = fun_dic[strategy](df["close"], outcome,
+                       per=per, **feature_dic)
             
         else:
             #stock["rsi_14"];
@@ -243,7 +253,8 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
             RSI1, RSI2 = rsi(df["close"])
             
             # Caracteristicas sobre las que se entrenara el modelo
-            feature_dic = {"log_return":marketReturn(df["close"]), "rsi":stock["rsi_14"], "macd":stock["macd"],"macds":stock["macds"],"cci":stock["cci"],
+            feature_dic = {"log_return":marketReturn(df["close"]), "rsi":stock["rsi_14"],
+                           "macd":stock["macd"],"macds":stock["macds"],"cci":stock["cci"],
                               "wr":stock["wr_14"], "trix":stock["trix"],
                               "vr":stock["vr"]}
 
@@ -269,9 +280,7 @@ def run_strategy(strategy,df,pair,ml_strategy,per):
                 print "\t"+key
             print "\n"
             sys.exit(1)
-    
-    # calculando el retorno del mercado en el tiempo seleccionado
-    df["cum_r"] = marketReturn(w["price"])
+
     return w,df["cum_r"]
     
             

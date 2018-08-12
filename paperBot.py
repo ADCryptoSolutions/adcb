@@ -42,7 +42,6 @@ def paper(pair, period, strategy):
     delta = timedelta(seconds = period)
     
     # desfase para en la mayoría de los casos no entrar al while
-    delta3 = timedelta(seconds = 90)
     ml_strategy = False
     have_coin = False
     len_data = 0
@@ -50,7 +49,7 @@ def paper(pair, period, strategy):
     # en el conjunto de datos de entrenamiento
     per = 0.95
     # dinero inicial con el que empieza el paperBot
-    btc_balance = 1.0
+    btc_balance = 100.0
     coin_balance = 0.0
     # definiendo el tiempo inicial de la consulta 
     if strategy in ml_strategies:

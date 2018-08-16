@@ -182,8 +182,8 @@ def run_strategy(strategy,df,pair,ml_strategy,per, typ=None):
     from strategy2 import pricevsEMA, pricevsSMA, EMAvsEMA, EMAvsSMA
     from strategy2 import SMAvsSMA, EMAvsSMA2, SMAvsSMA2
     from strategy2 import ml_randfor, ml_logreg, ml_knn, ml_mlpc, ml_bm
-    from strategy2 import ml_xgb, ml_stacking, ml_period
-    from strategy import crossingStrategy, crossingStrategy2, train_ml_period
+    from strategy2 import ml_xgb, ml_stacking, ml_period, train_ml_period
+    from strategy import crossingStrategy, crossingStrategy2
     fun_dic = {
       "pricevsEMA": pricevsEMA,
       "pricevsSMA": pricevsSMA,
@@ -208,8 +208,6 @@ def run_strategy(strategy,df,pair,ml_strategy,per, typ=None):
     
     w=0
     feature_dic = {}
-    # calculando el retorno del mercado en el tiempo seleccionado
-    df["cum_r"] = marketReturn(w["price"])
     
     if ml_strategy:
         from stockstats import StockDataFrame
@@ -220,14 +218,18 @@ def run_strategy(strategy,df,pair,ml_strategy,per, typ=None):
         
         # el diccionario de caracterísitcas para ml_period solo cuenta con
         # 2 elementos
-        if strategy[:-1] == "ml_period":
+        if strategy[:9] == "ml_period":
             
             ts_1 = df.shift(1)
             ts_2 = df.shift(2)
+            ts_3 = df.shift(3)
             tf_1 = df.shift(-1)
             
-            df["feat1"] = df["close"] > ts_1["close"]
-            df["feat2"] = df["close"] > ts_2["close"]
+            df["feat1"] = ts_1["close"] > ts_2["close"]
+            df["feat2"] = ts_2["close"] > ts_3["close"]
+            
+            #df["feat1"] = df["close"] > ts_1["close"]
+            #df["feat2"] = df["close"] > ts_2["close"]
             
             outcome = (tf_1["close"]>tf_1["open"])
             
@@ -235,7 +237,7 @@ def run_strategy(strategy,df,pair,ml_strategy,per, typ=None):
                            "rsi":stock["rsi_14"].shift(-1), 
                            "cci":stock["cci"].shift(-1)}
             
-            if strategy == "ml_period2" and typ != None:
+            if strategy == "ml_period2" and typ == "train":
                     
                     model, test = train_ml_period(df["close"], outcome,
                            per=per, **feature_dic)
@@ -280,6 +282,8 @@ def run_strategy(strategy,df,pair,ml_strategy,per, typ=None):
                 print "\t"+key
             print "\n"
             sys.exit(1)
+    # calculando el retorno del mercado en el tiempo seleccionado
+    df["cum_r"] = marketReturn(w["price"])
 
     return w,df["cum_r"]
     

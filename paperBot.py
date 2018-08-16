@@ -92,7 +92,7 @@ def paper(pair, period, strategy):
                     w, market_return = run_strategy(model, test)
             else:    
                 w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
-            
+            print w[["w","orders"]].tail()
             have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),w["orders"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance, strategy)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
             

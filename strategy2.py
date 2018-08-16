@@ -634,11 +634,8 @@ def ml_period(close, outcome, per=0.9, **kwargs):
     """
 
     # dataframe con pesos de la estrategia ideal
-    w = pd.DataFrame(data={"w": outcome,
+    w = pd.DataFrame(data={"w": ml_data(close, pl=False).values,
                            "price": close})
-
-    w["orders"] = orders(w["w"])
-    # vector de pesos de la estrategia ideal
 
     # diccionario que contendra las caracteristicas para evaluar y
     # el precio o weightedAverage sobre el que se quiere predecir
@@ -694,9 +691,6 @@ def train_ml_period(close, outcome, per=0.9, **kwargs):
     # dataframe con pesos de la estrategia ideal
     w = pd.DataFrame(data={"w": outcome,
                            "price": close})
-
-    w["orders"] = orders(w["w"])
-    # vector de pesos de la estrategia ideal
 
     # diccionario que contendra las caracteristicas para evaluar y
     # el precio o weightedAverage sobre el que se quiere predecir

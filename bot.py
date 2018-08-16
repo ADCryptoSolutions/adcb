@@ -234,8 +234,8 @@ def run_strategy(strategy,df,pair,ml_strategy,per, typ=None):
             outcome = (tf_1["close"]>tf_1["open"])
             
             feature_dic = {"feat1": df["feat1"], "feat2":df["feat2"], 
-                           "rsi":stock["rsi_14"].shift(-1), 
-                           "cci":stock["cci"].shift(-1)}
+                           "rsi":stock["rsi_14"].shift(-1).fillna(method='ffill'), 
+                           "cci":stock["cci"].shift(-1).fillna(method='ffill')}
             
             if strategy == "ml_period2" and typ == "train":
                     

@@ -49,7 +49,8 @@ def paper(pair, period, strategy):
     # en el conjunto de datos de entrenamiento
     per = 0.95
     # dinero inicial con el que empieza el paperBot
-    btc_balance = 100.0
+    init_balance = 100.0
+    btc_balance = init_balance
     coin_balance = 0.0
     count = 0
     model = None
@@ -116,7 +117,7 @@ def paper(pair, period, strategy):
                     print >> paper_resume, "\tProfit: {}%".format(round((balance-1)*100,2))
                 
                 print "\tBalance: %s"%(balance)
-                print "\tProfit: {}%".format(round((balance-1)*100,2))
+                print "\tProfit: {}%".format(round((balance-init_balance)*100,2))
                 print "\tHasta pronto..."
                 sys.exit(1)
             elif yn == "n" or yn == "N" or yn == "no" or yn == "NO":

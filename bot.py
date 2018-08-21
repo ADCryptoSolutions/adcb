@@ -178,11 +178,11 @@ def marketReturn(serie):
     print conn.returnBalances()['BTC']
     """
 
-def run_strategy(strategy,df,pair,ml_strategy,per, typ=None):
+def run_strategy(strategy,df,pair,ml_strategy,per, count=None):
     from strategy2 import pricevsEMA, pricevsSMA, EMAvsEMA, EMAvsSMA
     from strategy2 import SMAvsSMA, EMAvsSMA2, SMAvsSMA2
     from strategy2 import ml_randfor, ml_logreg, ml_knn, ml_mlpc, ml_bm
-    from strategy2 import ml_xgb, ml_stacking, ml_period, train_ml_period
+    from strategy2 import ml_xgb, ml_stacking, train_ml_model
     from strategy import crossingStrategy, crossingStrategy2
     fun_dic = {
       "pricevsEMA": pricevsEMA,
@@ -200,8 +200,7 @@ def run_strategy(strategy,df,pair,ml_strategy,per, typ=None):
       "ml_xgb": ml_xgb,
       "ml_stacking": ml_stacking,
       "crossing":crossingStrategy,
-      "crossing2":crossingStrategy2,
-      "ml_period":ml_period
+      "crossing2":crossingStrategy2
       }
     
     #ml_strategies = ["ml_logreg", "ml_randfor"]
@@ -211,55 +210,48 @@ def run_strategy(strategy,df,pair,ml_strategy,per, typ=None):
     
     if ml_strategy:
         from stockstats import StockDataFrame
-        from indicators import rsi
+        #from indicators import rsi
 
         # Creando indicadores para estrategia, via stockstats
         stock = StockDataFrame.retype(df.copy())
+    
+        ts_1 = df.shift(1)
+        ts_2 = df.shift(2)
+        ts_3 = df.shift(3)
+        #tf_1 = df.shift(-1)
         
-        # el diccionario de caracterísitcas para ml_period solo cuenta con
-        # 2 elementos
-        if strategy[:9] == "ml_period":
-            
-            ts_1 = df.shift(1)
-            ts_2 = df.shift(2)
-            ts_3 = df.shift(3)
-            tf_1 = df.shift(-1)
-            
-            df["feat1"] = ts_1["close"] > ts_2["close"]
-            df["feat2"] = ts_2["close"] > ts_3["close"]
-            
-            #df["feat1"] = df["close"] > ts_1["close"]
-            #df["feat2"] = df["close"] > ts_2["close"]
-            
-            outcome = (tf_1["close"]>tf_1["open"])
-            
-            feature_dic = {"feat1": df["feat1"], "feat2":df["feat2"], 
-                           "rsi":stock["rsi_14"].shift(-1).fillna(method='ffill'), 
-                           "cci":stock["cci"].shift(-1).fillna(method='ffill')}
-            
-            if strategy == "ml_period2" and typ == "train":
-                    
-                    model, test = train_ml_period(df["close"], outcome,
-                           per=per, **feature_dic)
-                    return model, test
+        df["feat1"] = ts_1["close"] > ts_2["close"]
+        df["feat2"] = ts_2["close"] > ts_3["close"]
 
+        #stock["rsi_14"];
+        #stock["cci"];
+        
+       # RSI1, RSI2 = rsi(df["close"])
+        
+        # Caracteristicas sobre las que se entrenara el modelo
+        #feature_dic = {"log_return":marketReturn(df["close"]), "rsi":stock["rsi_14"],
+        #               "macd":stock["macd"],"macds":stock["macds"],"cci":stock["cci"],
+        #                  "wr":stock["wr_14"], "trix":stock["trix"],
+        #                  "vr":stock["vr"]}
+        feature_dic = {"feat1": df["feat1"], "feat2":df["feat2"], 
+                       "rsi":stock["rsi_14"].shift(-1).fillna(method='ffill'), 
+                       "cci":stock["cci"].shift(-1).fillna(method='ffill')}
 
-            # Creando vector de pesos utilizando estrategia de ML
-            w = fun_dic[strategy](df["close"], outcome,
-                       per=per, **feature_dic)
-            
+        if strategy[-1] == "2":
+            if count == 1:
+                # Obteniendo modelo que se entrena una única vez y
+                # los datos de testeo
+                model, test = fun_dic[strategy[:-1]](df["close"], per=per,
+                           count=count, **feature_dic)
+
+                w = fun_dic[strategy[:-1]](df["close"], per=per, model=model,
+                           count=2, **feature_dic)
+
+            else:
+                w = fun_dic[strategy[:-1]](df["close"], per=per, model=model,
+                           count=count, **feature_dic)
+        
         else:
-            #stock["rsi_14"];
-            stock["cci"];
-            
-            RSI1, RSI2 = rsi(df["close"])
-            
-            # Caracteristicas sobre las que se entrenara el modelo
-            feature_dic = {"log_return":marketReturn(df["close"]), "rsi":stock["rsi_14"],
-                           "macd":stock["macd"],"macds":stock["macds"],"cci":stock["cci"],
-                              "wr":stock["wr_14"], "trix":stock["trix"],
-                              "vr":stock["vr"]}
-
             # Creando vector de pesos utilizando estrategia de ML
             w = fun_dic[strategy](df["close"], per=per, **feature_dic)
         

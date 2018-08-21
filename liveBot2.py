@@ -49,7 +49,7 @@ class LiveBot:
         self.ml_strategies = ["ml_logreg", "ml_randfor",
           "ml_knn", "ml_mlpc",
           "ml_bm", "ml_xgb",
-          "ml_stacking", "ml_period"] 
+          "ml_stacking"] 
         self.ml_strategy = False
         self.have_coin = False
         self.delta = timedelta(seconds=int(self.period))

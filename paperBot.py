@@ -38,7 +38,7 @@ def paper(pair, period, strategy):
     ml_strategies = ["ml_logreg", "ml_randfor",
       "ml_knn", "ml_mlpc",
       "ml_bm", "ml_xgb",
-      "ml_stacking", "ml_period"]    
+      "ml_stacking"]    
     delta = timedelta(seconds = period)
     
     # desfase para en la mayoría de los casos no entrar al while
@@ -56,7 +56,7 @@ def paper(pair, period, strategy):
     model = None
     test = None
     # definiendo el tiempo inicial de la consulta 
-    if strategy in ml_strategies:
+    if strategy.strip("2") in ml_strategies:
         # para estrategias de machine learning se tomarán los últimos
         # 7000 datos
         len_data = 7000
@@ -83,18 +83,10 @@ def paper(pair, period, strategy):
             df = prepareData(pair=pair, start=start, end=end, period=int(period))
             #print "El total de datos descargados es: ",len(df)
             # corriendo estrategia. Generando vector w
-            
-            # Si en esta estrategia el modelo se entrena una sola vez
-            if strategy == "ml_period2":
-                if count == 1:
-                    # Entrenando modelo y trayendo datos de testeo
-                    model, test = run_strategy(strategy,df,pair,ml_strategy,per, "train")
-                else:
-                    w, market_return = run_strategy(model, test)
-            else:    
-                w, market_return = run_strategy(strategy,df,pair,ml_strategy,per)
-            print w[["w","orders"]].tail()
-            have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),w["orders"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance, strategy)
+
+            w, market_return = run_strategy(strategy,df,pair, ml_strategy, per, count)
+            print w[["w"]].tail()
+            have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),w["w"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance, strategy)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
             
             
@@ -130,32 +122,37 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,s
 	
     fee = 0.0025
     balance = btc_balance + coin_balance*close
-    if signal == "WAIT":
-        print time, pair, close, signal," ->balance:",round(balance,5),"BTC"
+    #if signal == "WAIT":
+    #    print time, pair, close, signal," ->balance:",round(balance,5),"BTC"
     
-    elif signal == "SELL":
+    # vender
+    # si es cero
+    if not signal:
+        # y tiene el activo
         if have_coin:
             btc_balance = (coin_balance*close)*(1-fee)
             coin_balance = 0.0
             balance = btc_balance
-            print "\n\tEstrategia: ",strategy,"\n"
+            print "\n\tEstrategia: ",strategy, "SELL!", "\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN",coin_balance,"BTC",btc_balance
-            correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, "emetdan@gmail.com")
+            #correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, "emetdan@gmail.com")
             have_coin = False
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
             #print "No quizo vender el berraco"
             #print "coin_balance: {}, btc_balance: {}".format(coin_balance,btc_balance)
             print time, pair, close, "WAIT"," ->balance:",round(balance,5),"BTC"
-    
-    elif signal == "BUY":
+    # comprar
+    # si es uno
+    else:
+        # y no tiene el activo
         if not have_coin:
             coin_balance = (btc_balance/close)*(1-fee)
             btc_balance = 0.0
             balance = coin_balance*close
-            print "\n\tEstrategia: ",strategy,"\n"
+            print "\n\tEstrategia: ",strategy, "BUY!", "\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN:",coin_balance,"BTC:",btc_balance
-            correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, "emetdan@gmail.com")
+            #correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, "emetdan@gmail.com")
             have_coin = True
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)

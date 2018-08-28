@@ -184,6 +184,7 @@ def run_strategy(strategy,df,pair,ml_strategy,per, count=None):
     from strategy2 import ml_randfor, ml_logreg, ml_knn, ml_mlpc, ml_bm
     from strategy2 import ml_xgb, ml_stacking, train_ml_model
     from strategy import crossingStrategy, crossingStrategy2
+    from sklearn.externals import joblib
     fun_dic = {
       "pricevsEMA": pricevsEMA,
       "pricevsSMA": pricevsSMA,
@@ -241,15 +242,19 @@ def run_strategy(strategy,df,pair,ml_strategy,per, count=None):
             if count == 1:
                 # Obteniendo modelo que se entrena una única vez y
                 # los datos de testeo
-                model, test = fun_dic[strategy[:-1]](df["close"], per=per,
-                           count=count, **feature_dic)
+                print "En strategy2, count = 1"
+                #model, test = fun_dic[strategy[:-1]](df["close"], per=per,
+                #           count=count, **feature_dic)
+                
+                #joblib.dump(model, 'model.pkl')
 
-                w = fun_dic[strategy[:-1]](df["close"], per=per, model=model,
-                           count=2, **feature_dic)
+                w = fun_dic[strategy[:-1]](df["close"], per=per, **feature_dic)
 
             else:
+                print "En estrategy2, count !=1"
+                model = joblib.load('model.pkl')
                 w = fun_dic[strategy[:-1]](df["close"], per=per, model=model,
-                           count=count, **feature_dic)
+                           **feature_dic)
         
         else:
             # Creando vector de pesos utilizando estrategia de ML

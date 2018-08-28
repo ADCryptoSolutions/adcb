@@ -1,2 +1,0 @@
-	Balance: 100.0
-	Profit: 9900.0%

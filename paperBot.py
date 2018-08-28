@@ -85,7 +85,7 @@ def paper(pair, period, strategy):
             # corriendo estrategia. Generando vector w
 
             w, market_return = run_strategy(strategy,df,pair, ml_strategy, per, count)
-            print w[["w"]].tail(10)
+            #print w[["w"]].tail(10)
             have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),w["w"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance, strategy)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
             
@@ -109,7 +109,7 @@ def paper(pair, period, strategy):
                     print >> paper_resume, "\tProfit: {}%".format(round((balance-1)*100,2))
                 
                 print "\tBalance: %s"%(balance)
-                print "\tProfit: {}%".format(round((balance-init_balance)*100,2))
+                print "\tProfit: {}%".format(round((balance-init_balance)/init_balance*100,2))
                 print "\tHasta pronto..."
                 sys.exit(1)
             elif yn == "n" or yn == "N" or yn == "no" or yn == "NO":
@@ -135,7 +135,7 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,s
             balance = btc_balance
             print "\n\tEstrategia: ",strategy, "SELL!", "\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN",coin_balance,"BTC",btc_balance
-            #correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, "emetdan@gmail.com")
+            correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, "emetdan@gmail.com")
             have_coin = False
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
@@ -152,7 +152,7 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,s
             balance = coin_balance*close
             print "\n\tEstrategia: ",strategy, "BUY!", "\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN:",coin_balance,"BTC:",btc_balance
-            #correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, "emetdan@gmail.com")
+            correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, "emetdan@gmail.com")
             have_coin = True
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)

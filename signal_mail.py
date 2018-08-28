@@ -28,7 +28,7 @@ def correo(order, date, pair, close, coin_balance, btc_balance, balance, strateg
     passw = datosr[1].strip(" ").strip("\n")
     
     #destinatario = "emetdan@gmail.com, sbuelvasch@gmail.com, eegutierrezb@gmail.com"
-    asunto = "%s_Bot. Orden %s puesta en %s"%(strategy, order, pair) 
+    asunto = "%s_Bot. Orden puesta en %s"%(strategy, pair) 
     mensaje1=open('mail_message.txt').read()%(order, hour, day, strategy, pair, close, pair.split("_")[1], coin_balance, pair.split("_")[0], btc_balance, balance, pair.split("_")[0])
     
     #Prepara asunto y remitentes

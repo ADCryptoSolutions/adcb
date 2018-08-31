@@ -13,7 +13,7 @@ from sklearn.neural_network import BernoulliRBM
 from sklearn.pipeline import Pipeline
 from xgboost import XGBClassifier
 from vecstack import stacking
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, recall_score, f1_score, precision_score
 from sklearn.externals import joblib
 import sys
 # dada una serie de pandas o una lista y el numero de muestras para la EMA y
@@ -353,9 +353,6 @@ def ml_stacking(close, per=0.9, **kwargs):
     """
     from vecstack import stacking
     from sklearn.svm import SVC
-    from sklearn.metrics import accuracy_score
-
-
 
     clf1 = RandomForestClassifier(n_estimators=45, max_depth=4, min_samples_split=65)
     clf3 = XGBClassifier(n_estimators=9, learning_rate=0.75, gamma=12)

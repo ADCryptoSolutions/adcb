@@ -59,7 +59,7 @@ def paper(pair, period, strategy):
     if strategy.strip("2") in ml_strategies:
         # para estrategias de machine learning se tomarán los últimos
         # 7000 datos
-        len_data = 7000
+        len_data = 5000
         ml_strategy = True
     else: 
         # para estrategias diferentes a las de ML se toman los últimos
@@ -85,8 +85,11 @@ def paper(pair, period, strategy):
             # corriendo estrategia. Generando vector w
 
             w, market_return = run_strategy(strategy,df,pair, ml_strategy, per, count)
-            #print w[["w"]].tail(10)
-            have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),w["w"][-1],pair,df["close"][-1],have_coin,coin_balance,btc_balance, strategy)
+            print w[["w"]].tail(3)
+            have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),
+                                                w["w"][-1],pair,df["close"][-1],
+                                                have_coin,coin_balance,btc_balance,
+                                                strategy, period)
             #print "%s %s %s %s %s\n"%(tf.strftime('%Y-%m-%d %H:%M:%S'),strategy,pair,w["orders"][-1],df["close"][-1])
             
             
@@ -118,9 +121,9 @@ def paper(pair, period, strategy):
 
 
 # imprime en pantalla deacuerdo a la señal dada
-def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,strategy = "hf"):
+def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,strategy = "hf", period="ad"):
 	
-    fee = 0.0025
+    fee = 0.002
     balance = btc_balance + coin_balance*close
     #if signal == "WAIT":
     #    print time, pair, close, signal," ->balance:",round(balance,5),"BTC"
@@ -130,13 +133,28 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,s
     if not signal:
         # y tiene el activo
         if have_coin:
-            btc_balance = (coin_balance*close)*(1-fee)
-            coin_balance = 0.0
-            balance = btc_balance
-            print "\n\tEstrategia: ",strategy, "SELL!", "\n"
-            print time, pair, close, signal," ->balance:",round(balance,5),"COIN",coin_balance,"BTC",btc_balance
-            correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, "emetdan@gmail.com")
-            have_coin = False
+            # último precio de compra
+            lb_price = float(open("last_buy_price.txt").readlines()[0].strip(" ").strip("\n"))
+            # profit temporal si se vendiera ahora
+            temp_profit = (close-lb_price)/lb_price
+            # precio mínimo para tener ganancias
+            MIN_TARGET = 2*fee
+            # máxima pérdida soportada
+            STOP_LOSS = -4*fee
+            print "MIN_TARGET: %s, STOP_LOSS:%s"%(MIN_TARGET, STOP_LOSS)
+            # o toca el STOP o toca el TARGET para vender
+            if temp_profit > MIN_TARGET or temp_profit < STOP_LOSS:
+                btc_balance = (coin_balance*close)*(1-fee)
+                coin_balance = 0.0
+                balance = btc_balance
+                print "\n\tEstrategia: ",strategy, "SELL!", "\n"
+                print time, pair, close, signal," ->balance:",round(balance,5),"COIN",coin_balance,"BTC",btc_balance
+                correo(signal, time, pair, close, coin_balance, btc_balance,
+                       balance, strategy, "emetdan@gmail.com", period=period)
+                have_coin = False
+            else:
+                print "last buy price:", lb_price
+                print time, pair, close, "WAIT, temp_profit", temp_profit," ->balance:",round(balance,5),"BTC"
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
             #print "No quizo vender el berraco"
@@ -152,8 +170,11 @@ def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,s
             balance = coin_balance*close
             print "\n\tEstrategia: ",strategy, "BUY!", "\n"
             print time, pair, close, signal," ->balance:",round(balance,5),"COIN:",coin_balance,"BTC:",btc_balance
-            correo(signal, time, pair, close, coin_balance, btc_balance, balance, strategy, "emetdan@gmail.com")
+            correo(signal, time, pair, close, coin_balance, btc_balance,
+                   balance, strategy, "emetdan@gmail.com", period=period)
             have_coin = True
+            with open("last_buy_price.txt", "w") as f:
+                f.write(str(close))
         else:
             #print "\nhave_coin: {}, not have_coin {}".format(have_coin,not have_coin)
             #print "No quizo comprar el berraco"

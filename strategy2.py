@@ -398,7 +398,7 @@ def ml_stacking(close, per=0.9, **kwargs):
 
                            save_dir=None,
 
-                           metric=accuracy_score,      # metric: callable
+                           metric=f1_score,      # metric: callable
                            n_folds=4,                  # number of folds
                            stratified=True,
                            shuffle=True,
@@ -420,7 +420,8 @@ def ml_stacking(close, per=0.9, **kwargs):
     w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
     w_pred["orders"] = orders(w_pred["w"])
     
-    print "Accuracy:%s"%accuracy_score(test["best_w"], pred)
+    print "precision_score:%s"%precision_score(test["best_w"], pred)
+    print "f1_score:%s"%f1_score(test["best_w"], pred)
 
     return w_pred
 
@@ -484,5 +485,7 @@ def test_ml_model(model, test):
     # dataframe con vector de pesos de estrategia de regresio logistica
     w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
 
-    print "Accuracy:%s"%accuracy_score(test["best_w"], pred)
+    print "precision_score:%s"%precision_score(test["best_w"], pred)
+    print "f1_score:%s"%f1_score(test["best_w"], pred)
+    
     return w_pred

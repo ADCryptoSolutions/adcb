@@ -395,29 +395,25 @@ def sortino_ratio(rets):
 
 	return rets.mean()/sortino
 
-def stop_inspector(buy_price, pair, perc=5.0, polo):
-    """Inspecciona el precio para vender en caso de que el precio de compra
-       haya perdido perc%
+#def stop_inspector(buy_price, pair, perc=5.0, polo):
+#    """Inspecciona el precio para vender en caso de que el precio de compra
+#       haya perdido perc%
        
-       :param buy_price: último precio de compra
-       :type buy_price: float
-       :param prec: Porcentaje de perdida para el cual se vende
-       :param polo: Objeto poloniex
-       :type polo: class poloniex.Poloniex"""
+#       :param buy_price: último precio de compra
+#       :type buy_price: float
+#       :param prec: Porcentaje de perdida para el cual se vende
+#       :param polo: Objeto poloniex
+#       :type polo: class poloniex.Poloniex"""
     
-    while True:
+#    while True:
 
-        ticker = float(polo.returnTicker()[pair]["last"])
+#        ticker = float(polo.returnTicker()[pair]["last"])
         
-        stop_price = buy_price*(1 - (float(perc)/100))  
+#        stop_price = buy_price*(1 - (float(perc)/100))  
         
-        if ticker <= stop_price:
+#        if ticker <= stop_price:
             
-        
-           
-    
-	
-	
+
 if __name__ == "__main__":
     main(sys.argv[1:])
 

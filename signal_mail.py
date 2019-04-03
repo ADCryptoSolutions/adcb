@@ -47,7 +47,7 @@ def correo(order, date, pair, close, coin_balance, btc_balance, balance, strateg
     msg.attach(text)    
 
     # inicia servicio de envío de correos
-    server = smtplib.SMTP('mail1.webnode.com') 
+    server = smtplib.SMTP('smtp.gmail.com') 
     server.starttls()
     server.login(remitente,passw)
 
@@ -58,6 +58,6 @@ def correo(order, date, pair, close, coin_balance, btc_balance, balance, strateg
 
 if __name__ == "__main__":
 	
-	order, date, pair, close, coin_balance, btc_balance, balance, strategy, destinatarios = "BUY", "2017-12-25 23:55:00", "BTC_DGB", str(0.00000500), str(2000), str(0.0), str(0.0002), "ml_knn", "angietata28@gmail.com, emetdan@gmail.com, sbuelvasch@gmail.com"
+	order, date, pair, close, coin_balance, btc_balance, balance, strategy, destinatarios = "BUY", "2017-12-25 23:55:00", "BTC_DGB", str(0.00000500), str(2000), str(0.0), str(0.0002), "ml_knn", "angietata28@gmail.com, emetdan@gmail.com"
 	
 	correo(order, date, pair, close, coin_balance, btc_balance, balance, strategy, destinatarios)

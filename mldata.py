@@ -21,10 +21,12 @@ def ml_data(w,pl=True, la=3):
 	yn = [p[1] for p in _min]
 	
 	if pl:
+		plt.figure(clear=True)
 		plot = plt.plot(x, y)
 		plt.hold(True)
 		plt.plot(xm, ym, "r+")
 		plt.plot(xn, yn, "g+")
+		plt.show()    
 	
 	# creando serie que contendra 0 cuando hay maximo, 
 	# 1 cuando hay minimo y 2 cuando no hay ninguno.

@@ -7,7 +7,7 @@ import pandas as pd
 
 def profit(w):
 
-  print w.head(2)
+  #print w.head(2)
   w['w'] = w['w'].shift(1)
   logReturn = np.log(w["price"]).diff().fillna(0)
   vecLogReturn = (logReturn*w["w"]).cumsum()

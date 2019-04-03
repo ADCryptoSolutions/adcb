@@ -207,7 +207,7 @@ def pricevsSMA(serie, smaPeriod=20):
     return w
 
 
-def ml_logreg(close, per=0.9, model=None, test=None, **kwargs):
+def ml_logreg(close, per=0.9, model=None, test=None, la=14, **kwargs):
     """
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -219,8 +219,8 @@ def ml_logreg(close, per=0.9, model=None, test=None, **kwargs):
     # si el modelo no viene pre entrenado
     if model is None:
         # iniciando modelo de XGBoost
-        model = LogisticRegression(C=0.150)
-        model, test = train_ml_model(close, model, per, **kwargs)
+        model = LogisticRegression(C=0.07537)
+        model, test = train_ml_model(close, model, per, la=la, **kwargs)
         joblib.dump(model, 'model.pkl')
 
     # obteniendo datos de testeo
@@ -230,7 +230,7 @@ def ml_logreg(close, per=0.9, model=None, test=None, **kwargs):
     return w_pred
 
 
-def ml_randfor(close, per=0.9, model=None, test=None, **kwargs):
+def ml_randfor(close, per=0.9, model=None, test=None, la=14, **kwargs):
     """
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -241,9 +241,9 @@ def ml_randfor(close, per=0.9, model=None, test=None, **kwargs):
     # si el modelo no viene pre entrenado
     if model is None:
         # iniciando modelo de regresion logistica
-        model = RandomForestClassifier(n_estimators=45, max_depth=4,
-                                               min_samples_split=65)
-        model, test = train_ml_model(close, model, per, **kwargs)
+        model = RandomForestClassifier(random_state=0, n_estimators=40, max_depth=5,
+                                               min_samples_split=78)
+        model, test = train_ml_model(close, model, per, la=la, **kwargs)
         joblib.dump(model, 'model.pkl')
 
     # obteniendo datos de testeo
@@ -253,7 +253,7 @@ def ml_randfor(close, per=0.9, model=None, test=None, **kwargs):
     return w_pred
 
 
-def ml_knn(close, per=0.9, model=None, test=None, **kwargs):
+def ml_knn(close, per=0.9, model=None, test=None, la=14, **kwargs):
     """
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -264,8 +264,8 @@ def ml_knn(close, per=0.9, model=None, test=None, **kwargs):
     # si el modelo no viene pre entrenado
     if model is None:
         # iniciando modelo de regresion logistica
-        model = KNeighborsClassifier(n_neighbors=110, weights="distance")
-        model, test = train_ml_model(close, model, per, **kwargs)
+        model = KNeighborsClassifier(n_neighbors=35, weights="uniform")
+        model, test = train_ml_model(close, model, per, la=la, **kwargs)
         joblib.dump(model, 'model.pkl')
 
     # obteniendo datos de testeo
@@ -275,7 +275,7 @@ def ml_knn(close, per=0.9, model=None, test=None, **kwargs):
     return w_pred
 
 
-def ml_mlpc(close, per=0.9, model=None, test=None, **kwargs):
+def ml_mlpc(close, per=0.9, model=None, test=None, la=14, **kwargs):
     """implements a multi-layer perceptron (MLP) algorithm
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -288,7 +288,7 @@ def ml_mlpc(close, per=0.9, model=None, test=None, **kwargs):
         # iniciando modelo de regresion logistica
         model = MLPClassifier(solver='lbfgs',
                              random_state=0, hidden_layer_sizes=(50, 20))
-        model, test = train_ml_model(close, model, per, **kwargs)
+        model, test = train_ml_model(close, model, per, la=la, **kwargs)
         joblib.dump(model, 'model.pkl')
 
     # obteniendo datos de testeo
@@ -298,7 +298,7 @@ def ml_mlpc(close, per=0.9, model=None, test=None, **kwargs):
     return w_pred
 
 
-def ml_bm(close, per=0.9, model=None, test=None, **kwargs):
+def ml_bm(close, per=0.9, model=None, test=None, la=14, **kwargs):
     """implements a Boltzman deep learning algorithm
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -310,9 +310,9 @@ def ml_bm(close, per=0.9, model=None, test=None, **kwargs):
     if model is None:
         # iniciando modelo de boltzman machine
         rbm = BernoulliRBM()
-        logistic = LogisticRegression(C=0.150)
+        logistic = LogisticRegression(C=0.07537)
         model = Pipeline([("rbm", rbm), ("logistic", logistic)])
-        model, test = train_ml_model(close, model, per, **kwargs)
+        model, test = train_ml_model(close, model, per, la=la, **kwargs)
         joblib.dump(model, 'model.pkl')
 
     # obteniendo datos de testeo
@@ -322,7 +322,7 @@ def ml_bm(close, per=0.9, model=None, test=None, **kwargs):
     return w_pred
 
 
-def ml_xgb(close, per=0.9, model=None, test=None, **kwargs):
+def ml_xgb(close, per=0.9, model=None, test=None, la=14, **kwargs):
     """
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -333,8 +333,8 @@ def ml_xgb(close, per=0.9, model=None, test=None, **kwargs):
     # si el modelo no viene pre entrenado
     if model is None:
         # iniciando modelo de XGBoost
-        model = XGBClassifier(n_estimators=9, learning_rate=0.75, gamma=12)
-        model, test = train_ml_model(close, model, per, **kwargs)
+        model = XGBClassifier(base_score=0.9, n_estimators=25, learning_rate=0.697, gamma=1.051)
+        model, test = train_ml_model(close, model, per, la=la, **kwargs)
         joblib.dump(model, 'model.pkl')
 
     # obteniendo datos de testeo
@@ -344,7 +344,7 @@ def ml_xgb(close, per=0.9, model=None, test=None, **kwargs):
     return w_pred
 
 
-def ml_stacking(close, per=0.9, **kwargs):
+def ml_stacking(close, per=0.9, la=14, **kwargs):
     """
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -354,16 +354,17 @@ def ml_stacking(close, per=0.9, **kwargs):
     from vecstack import stacking
     from sklearn.svm import SVC
 
-    clf1 = RandomForestClassifier(n_estimators=45, max_depth=4, min_samples_split=65)
-    clf3 = XGBClassifier(n_estimators=9, learning_rate=0.75, gamma=12)
+    clf1 = RandomForestClassifier(random_state=0, n_estimators=40, max_depth=5,
+                                               min_samples_split=78)
+    clf3 = XGBClassifier(base_score=0.9, n_estimators=25, learning_rate=0.697, gamma=1.051)
     #clf4 = SVC(probability=True)
     clf4 =  MLPClassifier(solver='lbfgs',random_state=0, hidden_layer_sizes=(50, 20))
-    clf7 = KNeighborsClassifier(n_neighbors=110, weights="distance")
+    clf7 = KNeighborsClassifier(n_neighbors=35, weights="uniform")
 
     models = [clf1,  clf4, clf7]
 
     # dataframe con pesos de la estrategia idea
-    w = pd.DataFrame(data={"w": ml_data(close, pl=False).values,
+    w = pd.DataFrame(data={"w": ml_data(close, pl=False, la=la).values,
                            "price": close})
 
     w["orders"] = orders(w["w"])
@@ -426,7 +427,7 @@ def ml_stacking(close, per=0.9, **kwargs):
     return w_pred
 
 
-def train_ml_model(close, model, per=0.9, train_ml=True, **kwargs):
+def train_ml_model(close, model, per=0.9, train_ml=True, la=14, **kwargs):
     """Entrena el modelo de las estrategias de ML. Devuelve el modelo
     entrenado y los datos de testeo.
 
@@ -437,7 +438,7 @@ def train_ml_model(close, model, per=0.9, train_ml=True, **kwargs):
     """
 
     # dataframe con pesos de la estrategia ideal
-    w = pd.DataFrame(data={"w": ml_data(close, pl=False).values,
+    w = pd.DataFrame(data={"w": ml_data(close, pl=False, la=la).values,
                            "price": close})
 
     # diccionario que contendra las caracteristicas para evaluar y

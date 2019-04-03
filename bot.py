@@ -178,7 +178,7 @@ def marketReturn(serie):
     print conn.returnBalances()['BTC']
     """
 
-def run_strategy(strategy,df,pair,ml_strategy,per, count=None):
+def run_strategy(strategy,df,pair,ml_strategy,per, count=None, la=14):
     from strategy2 import pricevsEMA, pricevsSMA, EMAvsEMA, EMAvsSMA
     from strategy2 import SMAvsSMA, EMAvsSMA2, SMAvsSMA2
     from strategy2 import ml_randfor, ml_logreg, ml_knn, ml_mlpc, ml_bm
@@ -244,22 +244,18 @@ def run_strategy(strategy,df,pair,ml_strategy,per, count=None):
                 # Obteniendo modelo que se entrena una única vez y
                 # los datos de testeo
                 print "En strategy2, count = 1"
-                #model, test = fun_dic[strategy[:-1]](df["close"], per=per,
-                #           count=count, **feature_dic)
-                
-                #joblib.dump(model, 'model.pkl')
 
-                w = fun_dic[strategy[:-1]](df["close"], per=per, **feature_dic)
+                w = fun_dic[strategy[:-1]](df["close"], per=per, la=la, **feature_dic)
 
             else:
                 print "En estrategy2, count !=1"
                 model = joblib.load('model.pkl')
-                w = fun_dic[strategy[:-1]](df["close"], per=per, model=model,
+                w = fun_dic[strategy[:-1]](df["close"], per=per, model=model, la=la,
                            **feature_dic)
         
         else:
             # Creando vector de pesos utilizando estrategia de ML
-            w = fun_dic[strategy](df["close"], per=per, **feature_dic)
+            w = fun_dic[strategy](df["close"], per=per, la=la, **feature_dic)
         
         #print df_rsi.isnull().any()
         #print df_rsi[df_rsi['RS1'].isnull()]

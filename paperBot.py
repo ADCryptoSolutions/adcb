@@ -59,7 +59,7 @@ def paper(pair, period, strategy):
     if strategy.strip("2") in ml_strategies:
         # para estrategias de machine learning se tomarán los últimos
         # 7000 datos
-        len_data = 5000
+        len_data = 15000
         ml_strategy = True
     else: 
         # para estrategias diferentes a las de ML se toman los últimos
@@ -85,7 +85,7 @@ def paper(pair, period, strategy):
             # corriendo estrategia. Generando vector w
 
             w, market_return = run_strategy(strategy,df,pair, ml_strategy, per, count)
-            print w[["w"]].tail(3)
+            #print w[["w"]].tail(3)
             have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),
                                                 w["w"][-1],pair,df["close"][-1],
                                                 have_coin,coin_balance,btc_balance,

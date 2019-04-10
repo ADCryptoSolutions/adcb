@@ -207,7 +207,7 @@ def pricevsSMA(serie, smaPeriod=20):
     return w
 
 
-def ml_logreg(close, per=0.9, model=None, test=None, la=14, **kwargs):
+def ml_logreg(close, per=0.9, model=None, test=None, la=14, prob=0.5, **kwargs):
     """
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -220,17 +220,17 @@ def ml_logreg(close, per=0.9, model=None, test=None, la=14, **kwargs):
     if model is None:
         # iniciando modelo de XGBoost
         model = LogisticRegression(C=0.07537)
-        model, test = train_ml_model(close, model, per, la=la, **kwargs)
+        model, test = train_ml_model(close, model, per, la, **kwargs)
         joblib.dump(model, 'model.pkl')
 
     # obteniendo datos de testeo
     model2, test = train_ml_model(close, model, per, train_ml=False, **kwargs)
-    w_pred = test_ml_model(model, test)
+    w_pred = test_ml_model(model, test, prob)
 
     return w_pred
 
 
-def ml_randfor(close, per=0.9, model=None, test=None, la=14, **kwargs):
+def ml_randfor(close, per=0.9, model=None, test=None, la=14, prob=0.5, **kwargs):
     """
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -248,12 +248,12 @@ def ml_randfor(close, per=0.9, model=None, test=None, la=14, **kwargs):
 
     # obteniendo datos de testeo
     model2, test = train_ml_model(close, model, per, train_ml=False, **kwargs)
-    w_pred = test_ml_model(model, test)
+    w_pred = test_ml_model(model, test, prob)
 
     return w_pred
 
 
-def ml_knn(close, per=0.9, model=None, test=None, la=14, **kwargs):
+def ml_knn(close, per=0.9, model=None, test=None, la=14, prob=0.5, **kwargs):
     """
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -270,12 +270,12 @@ def ml_knn(close, per=0.9, model=None, test=None, la=14, **kwargs):
 
     # obteniendo datos de testeo
     model2, test = train_ml_model(close, model, per, train_ml=False, **kwargs)
-    w_pred = test_ml_model(model, test)
+    w_pred = test_ml_model(model, test, prob)
 
     return w_pred
 
 
-def ml_mlpc(close, per=0.9, model=None, test=None, la=14, **kwargs):
+def ml_mlpc(close, per=0.9, model=None, test=None, la=14, prob=0.5, **kwargs):
     """implements a multi-layer perceptron (MLP) algorithm
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -293,12 +293,12 @@ def ml_mlpc(close, per=0.9, model=None, test=None, la=14, **kwargs):
 
     # obteniendo datos de testeo
     model2, test = train_ml_model(close, model, per, train_ml=False, **kwargs)
-    w_pred = test_ml_model(model, test)
+    w_pred = test_ml_model(model, test, prob)
 
     return w_pred
 
 
-def ml_bm(close, per=0.9, model=None, test=None, la=14, **kwargs):
+def ml_bm(close, per=0.9, model=None, test=None, la=14, prob=0.5, **kwargs):
     """implements a Boltzman deep learning algorithm
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -317,12 +317,12 @@ def ml_bm(close, per=0.9, model=None, test=None, la=14, **kwargs):
 
     # obteniendo datos de testeo
     model2, test = train_ml_model(close, model, per, train_ml=False, **kwargs)
-    w_pred = test_ml_model(model, test)
+    w_pred = test_ml_model(model, test, prob)
 
     return w_pred
 
 
-def ml_xgb(close, per=0.9, model=None, test=None, la=14, **kwargs):
+def ml_xgb(close, per=0.9, model=None, test=None, la=11, prob=0.5, **kwargs):
     """
     close: Serie de Pandas con precio de cierre. Se utiliza para crear
     estrategia ideal.
@@ -339,7 +339,7 @@ def ml_xgb(close, per=0.9, model=None, test=None, la=14, **kwargs):
 
     # obteniendo datos de testeo
     model2, test = train_ml_model(close, model, per, train_ml=False, **kwargs)
-    w_pred = test_ml_model(model, test)
+    w_pred = test_ml_model(model, test, prob)
 
     return w_pred
 
@@ -472,7 +472,7 @@ def train_ml_model(close, model, per=0.9, train_ml=True, la=14, **kwargs):
     return model, test
 
 
-def test_ml_model(model, test):
+def test_ml_model(model, test, pr=0.5):
     """Predice utilizando el modelo model sobre los datos de testeo test.
 
     :param model: Modelo de machine learning previamente entrenado
@@ -480,13 +480,17 @@ def test_ml_model(model, test):
     :param test: Datos de testeo
     :type test: Pandas DataFrame
     """
-    # prediciendo con el modelo
-    pred = model.predict(test.drop(["best_w", "close"], axis=1))
-
+    
+    prob = model.predict_proba(test.drop(["best_w", "close"], axis=1))
     # dataframe con vector de pesos de estrategia de regresio logistica
-    w_pred = pd.DataFrame(data={"w": pred, "price": test["close"]})
+    w_pred = pd.DataFrame(data={"prob":prob[:,1], "price": test["close"]})
+    
+    w_pred["w"] = w_pred["prob"]>pr
+        
+    
+    print w_pred.head(5)
 
-    print "precision_score:%s"%precision_score(test["best_w"], pred)
-    print "f1_score:%s"%f1_score(test["best_w"], pred)
+    print "precision_score:%s"%precision_score(test["best_w"], w_pred["w"])
+    print "f1_score:%s"%f1_score(test["best_w"], w_pred["w"])
     
     return w_pred

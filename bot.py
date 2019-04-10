@@ -178,7 +178,7 @@ def marketReturn(serie):
     print conn.returnBalances()['BTC']
     """
 
-def run_strategy(strategy,df,pair,ml_strategy,per, count=None, la=14):
+def run_strategy(strategy,df,pair,ml_strategy,per, count=None, la=11, prob=0.5):
     from strategy2 import pricevsEMA, pricevsSMA, EMAvsEMA, EMAvsSMA
     from strategy2 import SMAvsSMA, EMAvsSMA2, SMAvsSMA2
     from strategy2 import ml_randfor, ml_logreg, ml_knn, ml_mlpc, ml_bm
@@ -245,17 +245,17 @@ def run_strategy(strategy,df,pair,ml_strategy,per, count=None, la=14):
                 # los datos de testeo
                 print "En strategy2, count = 1"
 
-                w = fun_dic[strategy[:-1]](df["close"], per=per, la=la, **feature_dic)
+                w = fun_dic[strategy[:-1]](df["close"], per=per, la=la, prob=prob, **feature_dic)
 
             else:
                 print "En estrategy2, count !=1"
                 model = joblib.load('model.pkl')
                 w = fun_dic[strategy[:-1]](df["close"], per=per, model=model, la=la,
-                           **feature_dic)
+                           prob=prob, **feature_dic)
         
         else:
             # Creando vector de pesos utilizando estrategia de ML
-            w = fun_dic[strategy](df["close"], per=per, la=la, **feature_dic)
+            w = fun_dic[strategy](df["close"], per=per, la=la, prob=prob, **feature_dic)
         
         #print df_rsi.isnull().any()
         #print df_rsi[df_rsi['RS1'].isnull()]

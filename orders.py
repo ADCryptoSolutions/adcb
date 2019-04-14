@@ -21,6 +21,19 @@ def orders(w):
     return w2
 
 
+def prob2trades(w,c=0.0):
+    
+    w['w'] = 0
+    for i in range(1,len(w['prob'])):
+        # buy
+        if w['prob'][i] > 0.5+c:
+            w.loc[:,'w'].values[i] = 1
+        elif w['prob'][i] < 0.5-c:
+            w.loc[:,'w'].values[i] = 0
+        else:
+             w.loc[:,'w'].values[i] = w.loc[:,'pred'].values[i-1]
+
+
 def volatility_corection(w, volatility, type=0):
     """
     Corrige un vector de pesos derivado de una estrategia de cruce de medias

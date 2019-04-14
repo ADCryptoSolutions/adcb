@@ -3,7 +3,7 @@
 import pandas as pd
 import numpy as np
 from profit import change5
-from orders import orders, volatility_corection
+from orders import orders, volatility_corection, prob2trades
 from mldata import ml_data
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -472,7 +472,7 @@ def train_ml_model(close, model, per=0.9, train_ml=True, la=14, **kwargs):
     return model, test
 
 
-def test_ml_model(model, test, pr=0.5):
+def test_ml_model(model, test, pr=0.1):
     """Predice utilizando el modelo model sobre los datos de testeo test.
 
     :param model: Modelo de machine learning previamente entrenado
@@ -485,8 +485,9 @@ def test_ml_model(model, test, pr=0.5):
     # dataframe con vector de pesos de estrategia de regresio logistica
     w_pred = pd.DataFrame(data={"prob":prob[:,1], "price": test["close"]})
     
-    w_pred["w"] = w_pred["prob"]>pr
-        
+    #w_pred["w"] = w_pred["prob"]>pr
+    
+    prob2trades(w_pred,pr)
     
     print w_pred.head(5)
 

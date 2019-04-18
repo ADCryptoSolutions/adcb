@@ -59,7 +59,7 @@ def paper(pair, period, strategy):
     if strategy.strip("2") in ml_strategies:
         # para estrategias de machine learning se tomarán los últimos
         # 7000 datos
-        len_data = 15000
+        len_data = 10000
         ml_strategy = True
     else: 
         # para estrategias diferentes a las de ML se toman los últimos
@@ -77,6 +77,7 @@ def paper(pair, period, strategy):
             
             # definiendo el tiempo inicial de la consulta 
             to = tf-delta*len_data
+            print "\n\t to=%s"%to
             start = string2ts(to.strftime('%Y-%m-%d %H:%M:%S'))
                 
             # trayendo y preparando datos
@@ -85,7 +86,7 @@ def paper(pair, period, strategy):
             # corriendo estrategia. Generando vector w
 
             w, market_return = run_strategy(strategy,df,pair, ml_strategy, per,
-                                            count, la=11, prob=0.65)
+                                            count, la=11, prob=0.1)
             #print w[["w"]].tail(3)
             have_coin,coin_balance,btc_balance = run_paper_signal(str(df.index[-1]),
                                                 w["w"][-1],pair,df["close"][-1],
@@ -124,7 +125,7 @@ def paper(pair, period, strategy):
 # imprime en pantalla deacuerdo a la señal dada
 def run_paper_signal(time,signal,pair,close,have_coin,coin_balance,btc_balance,strategy = "hf", period="ad"):
 	
-    fee = 0.002
+    fee = 0.0008
     balance = btc_balance + coin_balance*close
     #if signal == "WAIT":
     #    print time, pair, close, signal," ->balance:",round(balance,5),"BTC"

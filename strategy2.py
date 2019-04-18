@@ -484,12 +484,10 @@ def test_ml_model(model, test, pr=0.1):
     prob = model.predict_proba(test.drop(["best_w", "close"], axis=1))
     # dataframe con vector de pesos de estrategia de regresio logistica
     w_pred = pd.DataFrame(data={"prob":prob[:,1], "price": test["close"]})
-    
-    #w_pred["w"] = w_pred["prob"]>pr
-    
+        
     prob2trades(w_pred,pr)
     
-    print w_pred.head(5)
+    print w_pred.tail(5)
 
     print "precision_score:%s"%precision_score(test["best_w"], w_pred["w"])
     print "f1_score:%s"%f1_score(test["best_w"], w_pred["w"])

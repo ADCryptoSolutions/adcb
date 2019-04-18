@@ -237,7 +237,8 @@ def run_strategy(strategy,df,pair,ml_strategy,per, count=None, la=11, prob=0.5):
         feature_dic = {"feat1": df["feat1"], "feat2":df["feat2"], 
                        "rsi":stock["rsi_14"].shift(-1).fillna(method='ffill'), 
                        "cci":stock["cci"].shift(-1).fillna(method='ffill'),
-                       "dma":stock["dma"], "kdjj":stock["kdjj"], "trix":stock["trix"]}
+                       "dma":stock["dma"], "kdjj":stock["kdjj"], "trix":stock["trix"],
+                        'volatility':df['volatility']}
 
         if strategy[-1] == "2":
             if count == 1:

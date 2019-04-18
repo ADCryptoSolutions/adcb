@@ -31,7 +31,7 @@ def prob2trades(w,c=0.0):
         elif w['prob'][i] < 0.5-c:
             w.loc[:,'w'].values[i] = 0
         else:
-             w.loc[:,'w'].values[i] = w.loc[:,'pred'].values[i-1]
+             w.loc[:,'w'].values[i] = w.loc[:,'w'].values[i-1]
 
 
 def volatility_corection(w, volatility, type=0):
